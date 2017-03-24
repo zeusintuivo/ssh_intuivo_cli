@@ -1,0 +1,65 @@
+#!/bin/bash
+# 
+# @author Zeus Intuivo <zeus@intuivo.com>
+#
+#
+sudo echo " Hi"
+
+PROVIDED_USER=""
+if [ ! -z "${1}" ] ;  then
+    PROVIDED_USER="${1}"
+else 
+	echo " Error"
+	echo " "
+	echo " ssh_generatekeys username    "
+	echo " "
+	echo " expected"
+	echo " "
+	exit 1
+fi
+
+
+	# Make sure the user is in their home directory
+	cd ~/
+
+	# Prompt for a username and host
+	printf "Please enter email : "
+	read EMAIL
+
+
+	# Do the key generation 
+
+	mkdir -p ~/.ssh/
+	chmod 700 ~/.ssh/
+	cd ~/.ssh/
+	OUTPUT_FOLDER=$(pwd)
+	touch ${OUTPUT_FOLDER}/authorized_keys
+	chmod 600 ${OUTPUT_FOLDER}/authorized_keys
+
+
+read -p "Correct Output File » ${OUTPUT_FOLDER}/${PROVIDED_USER}_rsa »? yes/no: " -n 1 -r
+echo    # (optional) move to a new line
+if [[ $REPLY =~ ^[Yy]$ ]]
+then
+
+
+	ssh-keygen -t rsa -b 4096 -C "${EMAIL}" -f ${OUTPUT_FOLDER}/${PROVIDED_USER}_rsa
+
+	chmod 400 ${OUTPUT_FOLDER}/${PROVIDED_USER}_rsa
+	#chmod 600 ${OUTPUT_FOLDER}/${PROVIDED_USER}_rsa
+
+	cat ${OUTPUT_FOLDER}/${PROVIDED_USER}_rsa.pub >> ${OUTPUT_FOLDER}/authorized_keys
+
+	chmod 600 ${OUTPUT_FOLDER}/authorized_keys
+	
+	ssh-add ${OUTPUT_FOLDER}/${PROVIDED_USER}_rsa
+	
+	ssh-add -l  || ssh-add -l -E md5
+
+	xclip -sel clip < ${OUTPUT_FOLDER}/${PROVIDED_USER}_rsa.pub
+
+
+	echo "The new key was copied to your clipboard"
+
+
+fi
