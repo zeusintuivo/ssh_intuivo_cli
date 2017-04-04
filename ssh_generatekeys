@@ -1,5 +1,5 @@
 #!/bin/bash
-# 
+#
 # @author Zeus Intuivo <zeus@intuivo.com>
 #
 #
@@ -8,7 +8,7 @@ sudo echo " Hi"
 PROVIDED_USER=""
 if [ ! -z "${1}" ] ;  then
     PROVIDED_USER="${1}"
-else 
+else
 	echo " Error"
 	echo " "
 	echo " ssh_generatekeys username    "
@@ -27,7 +27,7 @@ fi
 	read EMAIL
 
 
-	# Do the key generation 
+	# Do the key generation
 
 	mkdir -p ~/.ssh/
 	chmod 700 ~/.ssh/
@@ -51,9 +51,9 @@ then
 	cat ${OUTPUT_FOLDER}/${PROVIDED_USER}_rsa.pub >> ${OUTPUT_FOLDER}/authorized_keys
 
 	chmod 600 ${OUTPUT_FOLDER}/authorized_keys
-	
+
 	ssh-add ${OUTPUT_FOLDER}/${PROVIDED_USER}_rsa
-	
+
 	ssh-add -l  || ssh-add -l -E md5
 
 	xclip -sel clip < ${OUTPUT_FOLDER}/${PROVIDED_USER}_rsa.pub
