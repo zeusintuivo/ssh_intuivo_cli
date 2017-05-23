@@ -4,7 +4,7 @@
 #
 #
 
-sudo echo " Hi"
+sudo echo "Hey!"
 
 [ ! -d ~/.ssh/ ] && echo -e "\n  Error ~/.ssh/ does not exist \n "
 #cd ~/
@@ -54,13 +54,12 @@ echo "${TEST_GIT}"
 [[ "${TEST_GIT}" ==  *"successfully authenticated"* ]] && GET_USERNAME_FROM_GREETING=$(echo "${TEST_GIT%\!*}" | sed -e 's/Hi //') && USERNAME="${GET_USERNAME_FROM_GREETING}"
 
 
-
 git config --global user.email "${GET_EMAIL_FROM_PUB_KEY}"
 git config --global user.name "${USERNAME}"
 
-git config -l
-
-echo " "
-echo "ls -la ${OUTPUT_FOLDER}"
-echo " "
-ls -la ${OUTPUT_FOLDER}
+# git config -l
+#
+# echo " "
+# echo "ls -la ${OUTPUT_FOLDER}"
+# echo " "
+# ls -la ${OUTPUT_FOLDER}
