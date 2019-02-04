@@ -1,0 +1,36 @@
+#!/bin/bash
+#
+# @author Zeus Intuivo <zeus@intuivo.com>
+#
+#
+THISSCRIPTNAME=`basename "$0"`
+[ ! -d ~/.ssh/ ] && echo -e "\n  Error ~/.ssh/ does not exist \n "
+cd ~/.ssh/
+
+if [ -z "${PROVIDED_USER}" ];  then
+	if [ ! -z "${1}" ] ;  then
+    	PROVIDED_USER="${1}"
+	else
+		echo " Error"
+		echo " "
+		echo "   $THISSCRIPTNAME  PROVIDED_USER   "
+		echo "   $THISSCRIPTNAME     zeus   "
+		echo " "
+		echo " expected"
+		echo " "
+		echo " or set PROVIDED_USER=zeus  for example and call $THISSCRIPTNAME" 
+		echo " "
+		exit 1
+	fi
+fi
+
+OUTPUT_FOLDER=$(pwd)
+
+[ ! -f ${OUTPUT_FOLDER}/id_rsa ] && echo -e "\n  Error this key does not exist: ${OUTPUT_FOLDER}/id_rsa  \n" && exit 1
+
+sudo cp ${OUTPUT_FOLDER}/id_rsa ${OUTPUT_FOLDER}/${PROVIDED_USER}_rsa 
+chmod 400 ${OUTPUT_FOLDER}/id_rsa
+sudo cp ${OUTPUT_FOLDER}/id_rsa.pub ${OUTPUT_FOLDER}/${PROVIDED_USER}_rsa.pub 
+chmod 400 ${OUTPUT_FOLDER}/id_rsa.pub
+
+

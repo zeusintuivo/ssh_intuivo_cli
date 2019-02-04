@@ -56,7 +56,44 @@ then
 
 	ssh-add -l  || ssh-add -l -E md5
 
-	xclip -sel clip < ${OUTPUT_FOLDER}/${PROVIDED_USER}_rsa.pub
+
+
+
+function cpy {
+# REF: https://superuser.com/questions/472598/pbcopy-for-windows
+# I'm using the Git Bash command shell for Windows, and as someone noted above, 
+# using clip is very annoying, because it also copies the carriage return at the 
+# end of the output of any command. So I wrote this function to address it:
+# 
+# So for example:
+#
+# $ pwd | cpy  # copies directory path
+#
+# $ git branch | cpy # copies current branch of git repo to clipboard
+#
+while read data; do     # reads data piped in to cpy
+    echo "$data" | cat > /dev/clipboard     # echos the data and writes that to /dev/clipboard
+done
+tr -d '\n' < /dev/clipboard > /dev/clipboard     # removes new lines from the clipboard
+}
+
+
+
+	# check operation systems
+	if [[ "$(uname)" == "Darwin" ]] ; then
+	  # Do something under Mac OS X platform
+	  pbcopy < ${OUTPUT_FOLDER}/${PROVIDED_USER}_rsa.pub
+	elif [[ "$(expr substr $(uname -s) 1 5)" == "Linux" ]] ; then
+	  # Do something under GNU/Linux platform
+	  # ubuntu lsb_release -i | sed 's/Distributor\ ID://g' = \tUbuntu\n
+	  xclip -sel clip < ${OUTPUT_FOLDER}/${PROVIDED_USER}_rsa.pub
+	elif [[ "$(expr substr $(uname -s) 1 10)" == "MINGW32_NT" ]] ; then
+	  # Do something under Windows NT platform
+	  cat ${OUTPUT_FOLDER}/${PROVIDED_USER}_rsa.pub | cpy
+	  # cat ~/.ssh/id_rsa.pub | clip
+	  # nothing here
+	fi
+	
 
 
 	echo "The new key was copied to your clipboard"

@@ -46,16 +46,69 @@ GET_EMAIL_FROM_PUB_KEY=$(cat ${OUTPUT_FOLDER}/id_rsa.pub | grep -E -o "\b[A-Za-z
 GET_USERNAME_FROM_EMAIL=$(echo "${GET_EMAIL_FROM_PUB_KEY}" | grep -E -o "\b[A-Za-z0-9._%+-]+\b" | head -1 )
 
 USERNAME="${GET_USERNAME_FROM_EMAIL}"
-
+echo $USERNAME;
 #ssh -vT git@github.com
 TEST_GIT=$(ssh -T git@github.com 2>&1) #  Pipe both stderr and  stdout to variable
 echo "${TEST_GIT}"
-[[ "${TEST_GIT}" ==  *"Permission denied"* ]] && xclip -sel clip < ${OUTPUT_FOLDER}/${PROVIDED_USER}_rsa.pub  && echo "------ Key Needs to be added in WebPAGE. Copied to CLipboard"
+
+function cpy {
+# REF: https://superuser.com/questions/472598/pbcopy-for-windows
+# I'm using the Git Bash command shell for Windows, and as someone noted above, 
+# using clip is very annoying, because it also copies the carriage return at the 
+# end of the output of any command. So I wrote this function to address it:
+# 
+# So for example:
+#
+# $ pwd | cpy  # copies directory path
+#
+# $ git branch | cpy # copies current branch of git repo to clipboard
+#
+while read data; do     # reads data piped in to cpy
+    echo "$data" | cat > /dev/clipboard     # echos the data and writes that to /dev/clipboard
+done
+tr -d '\n' < /dev/clipboard > /dev/clipboard     # removes new lines from the clipboard
+}
+
+
+
+	# check operation systems
+	if [[ "$(uname)" == "Darwin" ]] ; then
+	  # Do something under Mac OS X platform
+	  echo "Stopping All SSH. It is expected to restart."
+	  sudo launchctl stop com.openssh.sshd
+	  wait
+	  killall sshd 2>/dev/null
+	  wait
+	  echo "Removing all Keys added to the agent."
+	  ssh-add -D   
+	  wait
+	  echo "Adding just the only key we want to use."
+	  ssh-add -K ${OUTPUT_FOLDER}/id_rsa
+
+[[ "${TEST_GIT}" ==  *"Permission denied"* ]] && $(pbcopy < ${OUTPUT_FOLDER}/${PROVIDED_USER}_rsa.pub)  && echo "------ Key Needs to be added in WebPAGE. Copied to CLipboard"
+	elif [[ "$(expr substr $(uname -s) 1 5)" == "Linux" ]] ; then
+	  # Do something under GNU/Linux platform
+	  # ubuntu lsb_release -i | sed 's/Distributor\ ID://g' = \tUbuntu\n
+[[ "${TEST_GIT}" ==  *"Permission denied"* ]] && $(xclip -sel clip < ${OUTPUT_FOLDER}/${PROVIDED_USER}_rsa.pub)  && echo "------ Key Needs to be added in WebPAGE. Copied to CLipboard"
+
+	elif [[ "$(expr substr $(uname -s) 1 10)" == "MINGW32_NT" ]] ; then
+	  # Do something under Windows NT platform
+[[ "${TEST_GIT}" ==  *"Permission denied"* ]] && $(cat ${OUTPUT_FOLDER}/${PROVIDED_USER}_rsa.pub | cpy)  && echo "------ Key Needs to be added in WebPAGE. Copied to CLipboard"
+	  # cat ${OUTPUT_FOLDER}/${PROVIDED_USER}_rsa.pub | cpy
+	  # cat ~/.ssh/id_rsa.pub | clip
+	  # nothing here
+	fi
+	
+
 [[ "${TEST_GIT}" ==  *"successfully authenticated"* ]] && GET_USERNAME_FROM_GREETING=$(echo "${TEST_GIT%\!*}" | sed -e 's/Hi //') && USERNAME="${GET_USERNAME_FROM_GREETING}"
 
 
 git config --global user.email "${GET_EMAIL_FROM_PUB_KEY}"
 git config --global user.name "${USERNAME}"
+
+OUTPUT_GITCONFIG=$(git config --global -l)
+echo "$OUTPUT_GITCONFIG"
+ssh-add -l
 
 # git config -l
 #
