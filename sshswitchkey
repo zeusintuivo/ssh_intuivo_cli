@@ -4,10 +4,24 @@
 #
 #
 
-sudo echo "Hey!"
+# 18:  SIMPLE helloworld echo -e "\033[38;5;18m FOREGROUND   "; echo -e "\033[48;5;18m BACKGROUND   "
+# 19:  SIMPLE helloworld echo -e "\033[38;5;19m FOREGROUND   "; echo -e "\033[48;5;19m BACKGROUND   "
+# 20:  SIMPLE helloworld echo -e "\033[38;5;20m FOREGROUND   "; echo -e "\033[48;5;20m BACKGROUND   "
+# 21:  SIMPLE helloworld echo -e "\033[38;5;21m FOREGROUND   "; echo -e "\033[48;5;21m BACKGROUND   "
+# 25:  SIMPLE helloworld echo -e "\033[38;5;25m FOREGROUND   "; echo -e "\033[48;5;25m BACKGROUND   "
+# 26:  SIMPLE helloworld echo -e "\033[38;5;26m FOREGROUND   "; echo -e "\033[48;5;26m BACKGROUND   "
+# 27:  SIMPLE helloworld echo -e "\033[38;5;27m FOREGROUND   "; echo -e "\033[48;5;27m BACKGROUND   "
+# 32:  SIMPLE helloworld echo -e "\033[38;5;32m FOREGROUND   "; echo -e "\033[48;5;32m BACKGROUND   "
+# 33:  SIMPLE helloworld echo -e "\033[38;5;33m FOREGROUND   "; echo -e "\033[48;5;33m BACKGROUND   "
+# 38:  SIMPLE helloworld echo -e "\033[38;5;38m FOREGROUND   "; echo -e "\033[48;5;38m BACKGROUND   "
+# 39:  SIMPLE helloworld echo -e "\033[38;5;39m FOREGROUND   "; echo -e "\033[48;5;39m BACKGROUND   "
+# 45:  SIMPLE helloworld echo -e "\033[38;5;45m FOREGROUND   "; echo -e "\033[48;5;45m BACKGROUND   "
+echo -e "\033[38;5;246m" 2>&1
+sudo echo "Hey!" 
 
-[ ! -d ~/.ssh/ ] && echo -e "\n  Error ~/.ssh/ does not exist \n "
+[ ! -d ~/.ssh/ ] && echo -e "\033[38;5;19m\n  Error ~/.ssh/ does not exist \n "
 #cd ~/
+echo -e "\033[38;5;20m"  2>&1
 cd ~/.ssh/
 #mkdir -p ~/.ssh/
 #chmod 700 ~/.ssh/
@@ -18,12 +32,12 @@ PROVIDED_USER=""
 if [ ! -z "${1}" ] ;  then
     PROVIDED_USER="${1}"
 else
-	echo " Error"
+	echo -e "\033[38;5;18m Error"
 	echo " "
-	echo " ssh_generatekeys username    "
+	echo -e "\033[38;5;19m  ssh_generatekeys username    "
 	echo " "
-	echo " expected"
-	echo -e "\n Pick from key on the list: \n ${KEYLIST} \n"
+	echo -e "\033[38;5;20m  expected"
+	echo -e "\033[38;5;21m \n Pick from key on the list: \n ${KEYLIST} \n"
 	echo " "
 	exit 1
 fi
@@ -32,7 +46,7 @@ fi
 
 
 OUTPUT_FOLDER=$(pwd)
-
+echo -e "\033[38;5;25m" 2>&1
 [ ! -f ${OUTPUT_FOLDER}/${PROVIDED_USER}_rsa ] && echo -e "\n  Error this key does not exist. Pick from key on the list: \n ${KEYLIST} \n" && exit 1
 sudo cp ${OUTPUT_FOLDER}/${PROVIDED_USER}_rsa ${OUTPUT_FOLDER}/id_rsa
 chmod 400 ${OUTPUT_FOLDER}/id_rsa
@@ -46,10 +60,11 @@ GET_EMAIL_FROM_PUB_KEY=$(cat ${OUTPUT_FOLDER}/id_rsa.pub | grep -E -o "\b[A-Za-z
 GET_USERNAME_FROM_EMAIL=$(echo "${GET_EMAIL_FROM_PUB_KEY}" | grep -E -o "\b[A-Za-z0-9._%+-]+\b" | head -1 )
 
 USERNAME="${GET_USERNAME_FROM_EMAIL}"
+echo -e "\033[38;5;26m" 2>&1
 echo $USERNAME;
 #ssh -vT git@github.com
 TEST_GIT=$(ssh -T git@github.com 2>&1) #  Pipe both stderr and  stdout to variable
-echo "${TEST_GIT}"
+
 
 function cpy {
 # REF: https://superuser.com/questions/472598/pbcopy-for-windows
@@ -74,14 +89,17 @@ tr -d '\n' < /dev/clipboard > /dev/clipboard     # removes new lines from the cl
 	# check operation systems
 	if [[ "$(uname)" == "Darwin" ]] ; then
 	  # Do something under Mac OS X platform
-	  echo "Stopping All SSH. It is expected to restart."
+	  echo -e "\033[38;5;26m Stopping All SSH. It is expected to restart."
+	  echo -e "\033[38;5;27m"
 	  sudo launchctl stop com.openssh.sshd
 	  wait
+	  echo -e "\033[38;5;32m"
 	  killall sshd 2>/dev/null
 	  wait
 	  echo "Removing all Keys added to the agent."
 	  ssh-add -D   
 	  wait
+	  echo -e "\033[38;5;33m"
 	  echo "Adding just the only key we want to use."
 	  ssh-add -K ${OUTPUT_FOLDER}/id_rsa
 
@@ -99,17 +117,20 @@ tr -d '\n' < /dev/clipboard > /dev/clipboard     # removes new lines from the cl
 	  # nothing here
 	fi
 	
-
+	echo -e "\033[38;5;38m" 2>&1
+TEST_GIT=$(ssh -T git@github.com 2>&1) #  Pipe both stderr and  stdout to variable
+echo "${TEST_GIT}"
 [[ "${TEST_GIT}" ==  *"successfully authenticated"* ]] && GET_USERNAME_FROM_GREETING=$(echo "${TEST_GIT%\!*}" | sed -e 's/Hi //') && USERNAME="${GET_USERNAME_FROM_GREETING}"
 
-
+echo -e "\033[38;5;39m" 2>&1
 git config --global user.email "${GET_EMAIL_FROM_PUB_KEY}"
+echo -e "\033[38;5;45m" 2>&1
 git config --global user.name "${USERNAME}"
-
+echo -e "\033[38;5;51m" 2>&1
 OUTPUT_GITCONFIG=$(git config --global -l)
 echo "$OUTPUT_GITCONFIG"
 ssh-add -l
-
+echo -e "\033[0m" 2>&1
 # git config -l
 #
 # echo " "
