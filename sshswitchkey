@@ -2,7 +2,19 @@
 #
 # @author Zeus Intuivo <zeus@intuivo.com>
 #
-#
+# 
+
+
+load_struct_testing_wget(){
+    local provider="$HOME/_/clis/execute_command_intuivo_cli/struct_testing"
+    [   -e "${provider}"  ] && source "${provider}" && echo  "Loaded locally"
+    [ ! -e "${provider}"  ] && eval """$(wget --quiet --no-check-certificate  https://raw.githubusercontent.com/zeusintuivo/execute_command_intuivo_cli/master/struct_testing -O -  2>/dev/null )"""   # suppress only wget download messages, but keep wget output for variable
+    ( ( ! command -v passed >/dev/null 2>&1; ) && echo -e "\n \n  ERROR! Loading struct_testing \n \n " && exit 69; )
+} # end load_struct_testing_wget
+load_struct_testing_wget
+
+USER_HOME=$HOME
+enforce_variable_with_value USER_HOME "$USER_HOME"
 
 # 18:  SIMPLE helloworld echo -e "\033[38;5;18m FOREGROUND   "; echo -e "\033[48;5;18m BACKGROUND   "
 # 19:  SIMPLE helloworld echo -e "\033[38;5;19m FOREGROUND   "; echo -e "\033[48;5;19m BACKGROUND   "
@@ -16,17 +28,24 @@
 # 38:  SIMPLE helloworld echo -e "\033[38;5;38m FOREGROUND   "; echo -e "\033[48;5;38m BACKGROUND   "
 # 39:  SIMPLE helloworld echo -e "\033[38;5;39m FOREGROUND   "; echo -e "\033[48;5;39m BACKGROUND   "
 # 45:  SIMPLE helloworld echo -e "\033[38;5;45m FOREGROUND   "; echo -e "\033[48;5;45m BACKGROUND   "
-echo -e "\033[38;5;246m" 2>&1
-sudo echo "Hey!" 
+echo -en "${RESET}\033[38;5;246m" 2>&1
+(( DEBUG )) && sudo echo "Hey!" 
+#echo -e "\033[38;5;45m FOREGROUND   "; echo -e "\033[48;5;45m BACKGROUND   "
+#cd ${USER_HOME}/
+EXECUTEOWD=$(pwd)
+(( DEBUG )) && echo $EXECUTEOWD
+[ -f "$EXECUTEOWD/.temp_keys" ] && (( DEBUG )) &&  echo "I found it "
+[ -f "$EXECUTEOWD/.temp_keys" ] &&  . "$EXECUTEOWD/.temp_keys"
 
-[ ! -d ~/.ssh/ ] && echo -e "\033[38;5;19m\n  Error ~/.ssh/ does not exist \n "
-#cd ~/
-echo -e "\033[38;5;20m"  2>&1
-cd ~/.ssh/
-#mkdir -p ~/.ssh/
-chmod 700 ~/.ssh/
+(( DEBUG )) && echo -e "\033[38;5;20m"  2>&1
+cd ${USER_HOME}/.ssh/
+#mkdir -p ${USER_HOME}/.ssh/
+sudo chmod 700 ${USER_HOME}/.ssh/
 
+[ ! -d ${USER_HOME}/.ssh/ ] && echo -e "\033[38;5;19m\n  Error ${USER_HOME}/.ssh/ does not exist \n "
 KEYLIST=$(ls *.pub | sed 's/id_rsa.pub//' | sed 's/_rsa.pub//')
+enforce_variable_with_value KEYLIST $KEYLIST
+
 
 PROVIDED_USER=""
 if [ ! -z "${1}" ] ;  then
@@ -39,98 +58,159 @@ else
 	echo -e "\033[38;5;20m  expected"
 	echo -e "\033[38;5;21m \n Pick from key on the list: \n ${KEYLIST} \n"
 	echo " "
+	enforce_variable_with_value PROVIDED_USER $PROVIDED_USER
 	exit 1
 fi
 
 
 
 
+
+
 OUTPUT_FOLDER=$(pwd)
-echo -e "\033[38;5;25m" 2>&1
-[ ! -f ${OUTPUT_FOLDER}/${PROVIDED_USER}_rsa ] && echo -e "\n  Error this key does not exist. Pick from key on the list: \n ${KEYLIST} \n" && exit 1
-sudo cp ${OUTPUT_FOLDER}/${PROVIDED_USER}_rsa ${OUTPUT_FOLDER}/id_rsa
-chmod 400 ${OUTPUT_FOLDER}/id_rsa
-sudo cp ${OUTPUT_FOLDER}/${PROVIDED_USER}_rsa.pub ${OUTPUT_FOLDER}/id_rsa.pub
-chmod 400 ${OUTPUT_FOLDER}/id_rsa.pub
+(( DEBUG )) && echo -e "\033[38;5;25m" 2>&1
+[ ! -f "${OUTPUT_FOLDER}/${PROVIDED_USER}_rsa" ] && echo -e "\n  Error this key does not exist. Pick from key on the list: \n ${KEYLIST} \n" && exit 1
+sudo cp "${OUTPUT_FOLDER}/${PROVIDED_USER}_rsa" "${OUTPUT_FOLDER}/id_rsa"
+sudo cp "${OUTPUT_FOLDER}/${PROVIDED_USER}_rsa.pub" "${OUTPUT_FOLDER}/id_rsa.pub"
 
+sudo chmod 700 "${OUTPUT_FOLDER}/id_rsa.pub"
+sudo chmod 700 "${OUTPUT_FOLDER}/id_rsa"
 
-
+(( DEBUG )) && echo chmod 1 get_file_chmod "${OUTPUT_FOLDER}"
+get_file_chmod "${OUTPUT_FOLDER}"  &>/dev/null 
+(( DEBUG )) && get_file_chmod "${OUTPUT_FOLDER}"
+(( DEBUG )) && echo chmod 2 get_file_chmod "${OUTPUT_FOLDER}/id_rsa.pub"
+get_file_chmod "${OUTPUT_FOLDER}/id_rsa.pub"  &>/dev/null 
+(( DEBUG )) && get_file_chmod "${OUTPUT_FOLDER}/id_rsa.pub"
+(( DEBUG )) && echo chmod 3  get_file_chmod "${OUTPUT_FOLDER}/id_rsa.pub"
+get_file_chmod "${OUTPUT_FOLDER}/id_rsa.pub"  &>/dev/null 
+(( DEBUG )) && get_file_chmod "${OUTPUT_FOLDER}/id_rsa.pub"
+(( DEBUG )) && echo sudo cat "${OUTPUT_FOLDER}/id_rsa.pub" 
+(( DEBUG )) && sudo cat "${OUTPUT_FOLDER}/id_rsa.pub" 
 # REF: https://www.shellhacks.com/regex-find-email-addresses-file-grep/
-GET_EMAIL_FROM_PUB_KEY=$(cat ${OUTPUT_FOLDER}/id_rsa.pub | grep -E -o "\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,6}\b")
+GET_EMAIL_FROM_PUB_KEY=$(sudo cat "${OUTPUT_FOLDER}/id_rsa.pub" | grep -E -o "\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,6}\b")
+enforce_variable_with_value GET_EMAIL_FROM_PUB_KEY $GET_EMAIL_FROM_PUB_KEY
+
 GET_USERNAME_FROM_EMAIL=$(echo "${GET_EMAIL_FROM_PUB_KEY}" | grep -E -o "\b[A-Za-z0-9._%+-]+\b" | head -1 )
+enforce_variable_with_value GET_USERNAME_FROM_EMAIL $GET_USERNAME_FROM_EMAIL
 
 USERNAME="${GET_USERNAME_FROM_EMAIL}"
-echo -e "\033[38;5;26m" 2>&1
-echo $USERNAME;
+enforce_variable_with_value USERNAME $USERNAME
+(( DEBUG )) && echo -e "\033[38;5;26m" 2>&1
+(( DEBUG )) && echo "$USERNAME";
 #ssh -vT git@github.com
-TEST_GIT=$(ssh -T git@github.com 2>&1) #  Pipe both stderr and  stdout to variable
+sudo chmod 400 "${OUTPUT_FOLDER}/id_rsa.pub"
+sudo chmod 400 "${OUTPUT_FOLDER}/id_rsa"
 
 
-function cpy {
-# REF: https://superuser.com/questions/472598/pbcopy-for-windows
-# I'm using the Git Bash command shell for Windows, and as someone noted above, 
-# using clip is very annoying, because it also copies the carriage return at the 
-# end of the output of any command. So I wrote this function to address it:
-# 
-# So for example:
-#
-# $ pwd | cpy  # copies directory path
-#
-# $ git branch | cpy # copies current branch of git repo to clipboard
-#
-while read data; do     # reads data piped in to cpy
-    echo "$data" | cat > /dev/clipboard     # echos the data and writes that to /dev/clipboard
-done
-tr -d '\n' < /dev/clipboard > /dev/clipboard     # removes new lines from the clipboard
-}
+(( DEBUG )) && enforce_variable_with_value GITPROVIDER $GITPROVIDER
+          if ( typeset -p "GITPROVIDER"  &>/dev/null ) &&  [ -n "${GITPROVIDER+x}" ] ; then
+          {
+              (( DEBUG )) && echo -e "${LIGHTGREEN} ✔ ${LIGHTYELLOW} ${GITPROVIDER} is given "
 
+            TEST_GIT=$(ssh -T "${GITPROVIDER}" 2>&1) #  Pipe both stderr and  stdout to variable
+            (( DEBUG )) && echo "${TEST_GIT}"
+           
+            (( DEBUG )) && echo chmod 1 get_file_chmod "${OUTPUT_FOLDER}"
+            get_file_chmod "${OUTPUT_FOLDER}"  &>/dev/null 
+            (( DEBUG )) && get_file_chmod "${OUTPUT_FOLDER}" 
+            (( DEBUG )) && echo chmod 2 get_file_chmod "${OUTPUT_FOLDER}/id_rsa.pub"
+            get_file_chmod "${OUTPUT_FOLDER}/id_rsa.pub"  &>/dev/null 
+            (( DEBUG )) && get_file_chmod "${OUTPUT_FOLDER}/id_rsa.pub" 
+            (( DEBUG )) && echo chmod 3  get_file_chmod "${OUTPUT_FOLDER}/id_rsa.pub"
+            get_file_chmod "${OUTPUT_FOLDER}/id_rsa.pub"  &>/dev/null 
+            (( DEBUG )) && get_file_chmod "${OUTPUT_FOLDER}/id_rsa.pub" 
+          } 
+          else 
+          {
+
+            TEST_GIT=$(ssh -T git@github.com 2>&1) #  Pipe both stderr and  stdout to variable
+            (( DEBUG )) && echo chmod 1 get_file_chmod "${OUTPUT_FOLDER}"
+            get_file_chmod "${OUTPUT_FOLDER}" &>/dev/null
+            (( DEBUG )) && get_file_chmod "${OUTPUT_FOLDER}"
+            (( DEBUG )) && echo chmod 2 get_file_chmod "${OUTPUT_FOLDER}/id_rsa.pub"
+            get_file_chmod "${OUTPUT_FOLDER}/id_rsa.pub" &>/dev/null
+            (( DEBUG )) && get_file_chmod "${OUTPUT_FOLDER}/id_rsa.pub"
+            (( DEBUG )) && echo chmod 3  get_file_chmod "${OUTPUT_FOLDER}/id_rsa.pub"
+            get_file_chmod "${OUTPUT_FOLDER}/id_rsa.pub" &>/dev/null
+            (( DEBUG )) && get_file_chmod "${OUTPUT_FOLDER}/id_rsa.pub"
+
+ (( DEBUG )) &&  echo -e "\033[38;5;38m" 2>&1
+(( DEBUG )) && echo "${TEST_GIT}"
+ enforce_variable_with_value TEST_GIT $TEST_GIT
+
+          }
+          fi
+            function cpy {
+            # REF: https://superuser.com/questions/472598/pbcopy-for-windows
+            # I'm using the Git Bash command shell for Windows, and as someone noted above, 
+            # using clip is very annoying, because it also copies the carriage return at the 
+            # end of the output of any command. So I wrote this function to address it:
+            # 
+            # So for example:
+            #
+            # $ pwd | cpy  # copies directory path
+            #
+            # $ git branch | cpy # copies current branch of git repo to clipboard
+            #
+            while read data; do     # reads data piped in to cpy
+                echo "$data" | cat > /dev/clipboard     # echos the data and writes that to /dev/clipboard
+            done
+            tr -d '\n' < /dev/clipboard > /dev/clipboard     # removes new lines from the clipboard
+            } # end cpy
 
 
 	# check operation systems
 	if [[ "$(uname)" == "Darwin" ]] ; then
 	  # Do something under Mac OS X platform
-	  echo -e "\033[38;5;26m Stopping All SSH. It is expected to restart."
-	  echo -e "\033[38;5;27m"
+	  (( DEBUG )) && echo -e "\033[38;5;26m Stopping All SSH. It is expected to restart."
+	  (( DEBUG )) && echo -e "\033[38;5;27m"
 	  sudo launchctl stop com.openssh.sshd
 	  wait
-	  echo -e "\033[38;5;32m"
+	  (( DEBUG )) && echo -e "\033[38;5;32m"
 	  killall sshd 2>/dev/null
 	  wait
-	  echo "Removing all Keys added to the agent."
+	  (( DEBUG )) && echo "Removing all Keys added to the agent."
 	  ssh-add -D   
 	  wait
-	  echo -e "\033[38;5;33m"
-	  echo "Adding just the only key we want to use."
+	  (( DEBUG )) && echo -e "\033[38;5;33m"
+	  (( DEBUG )) && echo "Adding just the only key we want to use."
 	  ssh-add -K ${OUTPUT_FOLDER}/id_rsa
 
-[[ "${TEST_GIT}" ==  *"Permission denied"* ]] && $(pbcopy < ${OUTPUT_FOLDER}/${PROVIDED_USER}_rsa.pub)  && echo "------ Key Needs to be added in WebPAGE. Copied to CLipboard"
+    [[ "${TEST_GIT}" ==  *"Permission denied"* ]] && $(pbcopy < ${OUTPUT_FOLDER}/${PROVIDED_USER}_rsa.pub)  && echo "------ Key Needs to be added in WebPAGE. Copied to CLipboard"
 	elif [[ "$(expr substr $(uname -s) 1 5)" == "Linux" ]] ; then
 	  # Do something under GNU/Linux platform
 	  # ubuntu lsb_release -i | sed 's/Distributor\ ID://g' = \tUbuntu\n
-[[ "${TEST_GIT}" ==  *"Permission denied"* ]] && $(xclip -sel clip < ${OUTPUT_FOLDER}/${PROVIDED_USER}_rsa.pub)  && echo "------ Key Needs to be added in WebPAGE. Copied to CLipboard"
+    [[ "${TEST_GIT}" ==  *"Permission denied"* ]] && $(xclip -sel clip < ${OUTPUT_FOLDER}/${PROVIDED_USER}_rsa.pub)  && echo "------ Key Needs to be added in WebPAGE. Copied to CLipboard"
 
 	elif [[ "$(expr substr $(uname -s) 1 10)" == "MINGW32_NT" ]] ; then
 	  # Do something under Windows NT platform
-[[ "${TEST_GIT}" ==  *"Permission denied"* ]] && $(cat ${OUTPUT_FOLDER}/${PROVIDED_USER}_rsa.pub | cpy)  && echo "------ Key Needs to be added in WebPAGE. Copied to CLipboard"
+    [[ "${TEST_GIT}" ==  *"Permission denied"* ]] && $(cat ${OUTPUT_FOLDER}/${PROVIDED_USER}_rsa.pub | cpy)  && echo "------ Key Needs to be added in WebPAGE. Copied to CLipboard"
 	  # cat ${OUTPUT_FOLDER}/${PROVIDED_USER}_rsa.pub | cpy
-	  # cat ~/.ssh/id_rsa.pub | clip
+	  # cat ${USER_HOME}/.ssh/id_rsa.pub | clip
 	  # nothing here
 	fi
-	
-	echo -e "\033[38;5;38m" 2>&1
-TEST_GIT=$(ssh -T git@github.com 2>&1) #  Pipe both stderr and  stdout to variable
-echo "${TEST_GIT}"
-[[ "${TEST_GIT}" ==  *"successfully authenticated"* ]] && GET_USERNAME_FROM_GREETING=$(echo "${TEST_GIT%\!*}" | sed -e 's/Hi //') && USERNAME="${GET_USERNAME_FROM_GREETING}"
 
-echo -e "\033[38;5;39m" 2>&1
+if [[ "${TEST_GIT}" ==  *"successfully authenticated"* ]] ; then 
+{
+  GET_USERNAME_FROM_GREETING=$(echo "${TEST_GIT%\!*}" | sed -e 's/Hi //') 
+  enforce_variable_with_value GET_USERNAME_FROM_GREETING $GET_USERNAME_FROM_GREETING
+  USERNAME="${GET_USERNAME_FROM_GREETING}"
+  enforce_variable_with_value USERNAME $USERNAME
+
+
+} 
+fi 
+
+echo -en "\033[38;5;39m" 2>&1
 git config --global user.email "${GET_EMAIL_FROM_PUB_KEY}"
-echo -e "\033[38;5;45m" 2>&1
+echo -en "\033[38;5;45m" 2>&1
 git config --global user.name "${USERNAME}"
-echo -e "\033[38;5;51m" 2>&1
-OUTPUT_GITCONFIG=$(git config --global -l)
-echo "$OUTPUT_GITCONFIG"
-ssh-add -l
-echo -e "\033[0m" 2>&1
+echo -en "\033[38;5;51m" 2>&1
+OUTPUT_GITCONFIG=$(git config --global -l )
+echo -n "$OUTPUT_GITCONFIG" | grep "user."
+(( DEBUG )) && ssh-add -l
+echo -en "\033[0m" 2>&1
 # git config -l
 #
 # echo " "
