@@ -168,14 +168,14 @@ sudo chmod 400 "${OUTPUT_FOLDER}/id_rsa"
 	  sudo launchctl stop com.openssh.sshd
 	  wait
 	  (( DEBUG )) && echo -e "\033[38;5;32m"
-	  killall sshd 2>/dev/null
+	  sudo killall sshd 2>/dev/null
 	  wait
 	  (( DEBUG )) && echo "Removing all Keys added to the agent."
-	  ssh-add -D   
+	  sudo ssh-add -D   
 	  wait
 	  (( DEBUG )) && echo -e "\033[38;5;33m"
 	  (( DEBUG )) && echo "Adding just the only key we want to use."
-	  ssh-add -K ${OUTPUT_FOLDER}/id_rsa
+	  sudo ssh-add -K ${OUTPUT_FOLDER}/id_rsa
 
     [[ "${TEST_GIT}" ==  *"Permission denied"* ]] && $(pbcopy < ${OUTPUT_FOLDER}/${PROVIDED_USER}_rsa.pub)  && echo "------ Key Needs to be added in WebPAGE. Copied to CLipboard"
 	elif [[ "$(expr substr $(uname -s) 1 5)" == "Linux" ]] ; then
@@ -209,7 +209,7 @@ git config --global user.name "${USERNAME}"
 echo -en "\033[38;5;51m" 2>&1
 OUTPUT_GITCONFIG=$(git config --global -l )
 echo -n "$OUTPUT_GITCONFIG" | grep "user."
-(( DEBUG )) && ssh-add -l
+(( DEBUG )) && sudo ssh-add -l
 echo -en "\033[0m" 2>&1
 # git config -l
 #
