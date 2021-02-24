@@ -108,6 +108,7 @@ sudo chmod 400 "${OUTPUT_FOLDER}/id_rsa"
           {
               (( DEBUG )) && echo -e "${LIGHTGREEN} ✔ ${LIGHTYELLOW} ${GITPROVIDER} is given "
 
+            (( DEBUG )) && echo "ssh -T ${GITPROVIDER}"
             TEST_GIT=$(ssh -T "${GITPROVIDER}" 2>&1) #  Pipe both stderr and  stdout to variable
             (( DEBUG )) && echo "${TEST_GIT}"
             (( DEBUG )) && echo chmod 1 get_file_chmod "${OUTPUT_FOLDER}"
