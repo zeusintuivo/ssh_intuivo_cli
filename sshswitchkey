@@ -37,6 +37,40 @@ EXECUTEOWD=$(pwd)
 [ -f "$EXECUTEOWD/.temp_keys" ] && (( DEBUG )) &&  echo "I found it "
 [ -f "$EXECUTEOWD/.temp_keys" ] &&  . "$EXECUTEOWD/.temp_keys"
 
+
+if [[ -n "${VPNREQUIRED}" ]] ;  then
+{
+  if (enforce_vpn_is_on "${PROVIDED_USER}") ; then  {
+    set -x
+    set +x
+  }
+  else
+  {
+    echo ERROR VPN IS NOT ON and is REQUIRED to authenticate
+    # [ $? -gt 0 ] && failed To connect before push  && exit 1
+  }
+  fi
+}
+fi
+
+FLAGGITPROVIDER=1
+if [[ -n "${GITPROVIDER}" ]] ;  then
+{
+  if (enforce_web_is_reachable  "${GITPROVIDER}") ; then {
+    set -x
+    set +x
+  }
+  else
+  {
+    FLAGGITPROVIDER=0
+    echo ERROR COULD reach GIT provider and required to authenticate ssh
+    # [ $? -gt 0 ] && failed To connect git provider push  && exit 1
+  }
+  fi
+}
+fi
+
+
 (( DEBUG )) && echo -e "\033[38;5;20m"  2>&1
 cd ${USER_HOME}/.ssh/
 #mkdir -p ${USER_HOME}/.ssh/
@@ -48,7 +82,7 @@ enforce_variable_with_value KEYLIST $KEYLIST
 
 
 PROVIDED_USER=""
-if [ ! -z "${1}" ] ;  then
+if [[  -n "${1}" ]] ;  then
     PROVIDED_USER="${1}"
 else
 	echo -e "\033[38;5;18m Error"
@@ -106,10 +140,10 @@ sudo chmod 400 "${OUTPUT_FOLDER}/id_rsa"
 (( DEBUG )) && enforce_variable_with_value GITPROVIDER $GITPROVIDER
           if ( typeset -p "GITPROVIDER"  &>/dev/null ) &&  [ -n "${GITPROVIDER+x}" ] ; then
           {
-              (( DEBUG )) && echo -e "${LIGHTGREEN} ✔ ${LIGHTYELLOW} ${GITPROVIDER} is given "
-
-            (( DEBUG )) && echo "ssh -T ${GITPROVIDER}"
-            TEST_GIT=$(ssh -T "${GITPROVIDER}" 2>&1) #  Pipe both stderr and  stdout to variable
+            (( DEBUG )) && echo -e "${LIGHTGREEN} ✔ ${LIGHTYELLOW} ${GITPROVIDER} is given "
+            TEST_GIT=""
+            (( FLAGGITPROVIDER )) && (( DEBUG )) && echo "ssh -T ${GITPROVIDER}"
+            (( FLAGGITPROVIDER )) && TEST_GIT=$(ssh -T "${GITPROVIDER}" 2>&1) #  Pipe both stderr and  stdout to variable
             (( DEBUG )) && echo "${TEST_GIT}"
             (( DEBUG )) && echo chmod 1 get_file_chmod "${OUTPUT_FOLDER}"
             get_file_chmod "${OUTPUT_FOLDER}"  &>/dev/null
@@ -123,8 +157,9 @@ sudo chmod 400 "${OUTPUT_FOLDER}/id_rsa"
           }
           else
           {
-
-            TEST_GIT=$(ssh -T git@github.com 2>&1) #  Pipe both stderr and  stdout to variable
+            TEST_GIT=""
+            (( FLAGGITPROVIDER )) && (( DEBUG )) && echo "ssh -T ${GITPROVIDER}"
+            (( FLAGGITPROVIDER )) &&  TEST_GIT=$(ssh -T git@github.com 2>&1) #  Pipe both stderr and  stdout to variable
             (( DEBUG )) && echo chmod 1 get_file_chmod "${OUTPUT_FOLDER}"
             get_file_chmod "${OUTPUT_FOLDER}" &>/dev/null
             (( DEBUG )) && get_file_chmod "${OUTPUT_FOLDER}"
@@ -136,8 +171,8 @@ sudo chmod 400 "${OUTPUT_FOLDER}/id_rsa"
             (( DEBUG )) && get_file_chmod "${OUTPUT_FOLDER}/id_rsa.pub"
 
  (( DEBUG )) &&  echo -e "\033[38;5;38m" 2>&1
-(( DEBUG )) && echo "${TEST_GIT}"
- enforce_variable_with_value TEST_GIT $TEST_GIT
+ (( FLAGGITPROVIDER )) &&  (( DEBUG )) && echo "${TEST_GIT}"
+ (( FLAGGITPROVIDER )) &&   enforce_variable_with_value TEST_GIT $TEST_GIT
 
           }
           fi
@@ -177,21 +212,21 @@ sudo chmod 400 "${OUTPUT_FOLDER}/id_rsa"
 	  (( DEBUG )) && echo "Adding just the only key we want to use."
 	  sudo ssh-add -K ${OUTPUT_FOLDER}/id_rsa
 
-    [[ "${TEST_GIT}" ==  *"Permission denied"* ]] && $(pbcopy < ${OUTPUT_FOLDER}/${PROVIDED_USER}_rsa.pub)  && echo "------ Key Needs to be added in WebPAGE. Copied to CLipboard"
+     (( FLAGGITPROVIDER )) &&  [[ "${TEST_GIT}" ==  *"Permission denied"* ]] && $(pbcopy < ${OUTPUT_FOLDER}/${PROVIDED_USER}_rsa.pub)  && echo "------ Key Needs to be added in WebPAGE. Copied to CLipboard"
 	elif [[ "$(expr substr $(uname -s) 1 5)" == "Linux" ]] ; then
 	  # Do something under GNU/Linux platform
 	  # ubuntu lsb_release -i | sed 's/Distributor\ ID://g' = \tUbuntu\n
-    # [[ "${TEST_GIT}" ==  *"Permission denied"* ]] && $(xclip -sel clip < ${OUTPUT_FOLDER}/${PROVIDED_USER}_rsa.pub)  && echo "------ Key Needs to be added in WebPAGE. Copied to CLipboard"
-    echo "no xclip"
+    #  (( FLAGGITPROVIDER )) &&  [[ "${TEST_GIT}" ==  *"Permission denied"* ]] && $(xclip -sel clip < ${OUTPUT_FOLDER}/${PROVIDED_USER}_rsa.pub)  && echo "------ Key Needs to be added in WebPAGE. Copied to CLipboard"
+     (( FLAGGITPROVIDER )) &&  echo "no xclip"
 	elif [[ "$(expr substr $(uname -s) 1 10)" == "MINGW32_NT" ]] ; then
 	  # Do something under Windows NT platform
-    [[ "${TEST_GIT}" ==  *"Permission denied"* ]] && $(cat ${OUTPUT_FOLDER}/${PROVIDED_USER}_rsa.pub | cpy)  && echo "------ Key Needs to be added in WebPAGE. Copied to CLipboard"
+     (( FLAGGITPROVIDER )) &&  [[ "${TEST_GIT}" ==  *"Permission denied"* ]] && $(cat ${OUTPUT_FOLDER}/${PROVIDED_USER}_rsa.pub | cpy)  && echo "------ Key Needs to be added in WebPAGE. Copied to CLipboard"
 	  # cat ${OUTPUT_FOLDER}/${PROVIDED_USER}_rsa.pub | cpy
 	  # cat ${USER_HOME}/.ssh/id_rsa.pub | clip
 	  # nothing here
 	fi
 
-if [[ "${TEST_GIT}" ==  *"successfully authenticated"* ]] ; then
+if  (( FLAGGITPROVIDER )) &&  [[ "${TEST_GIT}" ==  *"successfully authenticated"* ]] ; then
 {
   GET_USERNAME_FROM_GREETING=$(echo "${TEST_GIT%\!*}" | sed -e 's/Hi //')
   enforce_variable_with_value GET_USERNAME_FROM_GREETING $GET_USERNAME_FROM_GREETING
