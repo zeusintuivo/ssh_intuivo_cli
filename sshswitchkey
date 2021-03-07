@@ -40,9 +40,8 @@ EXECUTEOWD=$(pwd)
 
 if [[ -n "${VPNREQUIRED}" ]] ;  then
 {
-  if (enforce_vpn_is_on "${PROVIDED_USER}") ; then  {
-    set -x
-    set +x
+  if (enforce_vpn_is_on "${VPNREQUIRED}") ; then  {
+    echo Connected to VPN
   }
   else
   {
