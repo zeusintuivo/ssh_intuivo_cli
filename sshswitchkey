@@ -56,8 +56,9 @@ FLAGGITPROVIDER=1
 if [[ -n "${GITPROVIDER}" ]] ;  then
 {
   if (enforce_web_is_reachable  "${GITPROVIDER}") ; then {
-    set -x
-    set +x
+    # set -x
+    # set +x
+    echo Reached "${GITPROVIDER}"
   }
   else
   {
