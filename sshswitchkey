@@ -19,6 +19,7 @@
 echo -en "${RESET}\033[38;5;246m" 2>&1
 
 
+# -- SUDO START
 if [[ "${USER}" == 'root' || "${LOGNAME}" == 'root' ]] ; then
 {
   if [[ -n "${SUDO_USER}" && "${SUDO_USER}" != 'root' ]] ; then
@@ -98,6 +99,7 @@ enforce_variable_with_value LOGNAME "${LOGNAME}"
 enforce_variable_with_value SUDO_USER "${SUDO_USER}"
 enforce_variable_with_value SUDO_UID "${SUDO_UID}"
 # enforce_variable_with_value SUDO_GID "${SUDO_GID}"
+# -- SUDO END
 
 # echo -e "\033[38;5;45m FOREGROUND   "; echo -e "\033[48;5;45m BACKGROUND   "
 # cd ${USER_HOME}/
