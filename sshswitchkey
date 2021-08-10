@@ -234,7 +234,7 @@ sudo chown -R "${USER}" "${OUTPUT_FOLDER}/${PROVIDED_USER}_rsa.pub"
 sudo chown -R "${USER}" "${OUTPUT_FOLDER}/${PROVIDED_USER}_rsa"
 
 
-(( DEBUG )) && enforce_variable_with_value GITPROVIDER "${GITPROVIDER}"
+# (( DEBUG )) && enforce_variable_with_value GITPROVIDER "${GITPROVIDER}"
           if ( typeset -p "GITPROVIDER"  &>/dev/null ) &&  [ -n "${GITPROVIDER+x}" ] ; then
           {
             (( DEBUG )) && echo -e "${LIGHTGREEN} ✔ ${LIGHTYELLOW} ${GITPROVIDER} is given "
