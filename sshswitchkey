@@ -448,11 +448,6 @@ sudo chmod 600 "${OUTPUT_FOLDER}/id_rsa"
 sudo chown -R "${SUDO_USER}" "${OUTPUT_FOLDER}/id_rsa.pub"
 sudo chown -R "${SUDO_USER}" "${OUTPUT_FOLDER}/id_rsa"
 
-sudo chmod 400 "${OUTPUT_FOLDER}/${PROVIDED_USER}_rsa.pub"
-sudo chmod 400 "${OUTPUT_FOLDER}/${PROVIDED_USER}_rsa"
-# Assuming USER is root with sudo
-sudo chown -R "${USER}" "${OUTPUT_FOLDER}/${PROVIDED_USER}_rsa.pub"
-sudo chown -R "${USER}" "${OUTPUT_FOLDER}/${PROVIDED_USER}_rsa"
 
 
 # (( DEBUG )) && enforce_variable_with_value GITPROVIDER "${GITPROVIDER}"
@@ -549,6 +544,12 @@ sudo chown -R "${USER}" "${OUTPUT_FOLDER}/${PROVIDED_USER}_rsa"
 	  # nothing here
   }
 	fi
+
+sudo chmod 400 "${OUTPUT_FOLDER}/${PROVIDED_USER}_rsa.pub"
+sudo chmod 400 "${OUTPUT_FOLDER}/${PROVIDED_USER}_rsa"
+# Assuming USER is root with sudo
+sudo chown -R "${USER}" "${OUTPUT_FOLDER}/${PROVIDED_USER}_rsa.pub"
+sudo chown -R "${USER}" "${OUTPUT_FOLDER}/${PROVIDED_USER}_rsa"
 
 if  (( FLAGGITPROVIDER )) &&  [[ "${TEST_GIT}" ==  *"successfully authenticated"* ]] ; then
 {
