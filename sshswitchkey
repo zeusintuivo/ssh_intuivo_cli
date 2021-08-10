@@ -432,6 +432,11 @@ get_file_chmod "${OUTPUT_FOLDER}/id_rsa.pub"  &>/dev/null
 (( DEBUG )) && sudo cat "${OUTPUT_FOLDER}/id_rsa.pub"
 # REF: https://www.shellhacks.com/regex-find-email-addresses-file-grep/
 GET_EMAIL_FROM_PUB_KEY=$(sudo cat "${OUTPUT_FOLDER}/id_rsa.pub" | grep -E -o "\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,6}\b")
+if [[ -z "${GET_EMAIL_FROM_PUB_KEY}"  ]] ; then
+{
+GET_EMAIL_FROM_PUB_KEY="$(sudo cat "${OUTPUT_FOLDER}/id_rsa.pub" | cut -d ' ' -f3 )"
+}
+fi
 enforce_variable_with_value GET_EMAIL_FROM_PUB_KEY "${GET_EMAIL_FROM_PUB_KEY}"
 
 GET_USERNAME_FROM_EMAIL=$(echo "${GET_EMAIL_FROM_PUB_KEY}" | grep -E -o "\b[A-Za-z0-9._%+-]+\b" | head -1 )
