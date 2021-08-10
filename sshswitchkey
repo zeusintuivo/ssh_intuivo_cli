@@ -3,6 +3,224 @@
 # @author Zeus Intuivo <zeus@intuivo.com>
 #
 #
+function get_file_chmod() {
+  #!/bin/bash
+#
+# @author Zeus Intuivo <zeus@intuivo.com>
+#
+
+
+# Bash: Detect pipe/file input in a shell script
+# REF: https://gist.github.com/davejamesmiller/1966557
+
+# How to detect whether input is from keyboard, a file, or another process.
+# Useful for writing a script that can read from standard input, or prompt the
+# user for input if there is none.
+
+# Source: http://www.linuxquestions.org/questions/linux-software-2/bash-scripting-pipe-input-to-script-vs.-1-570945/
+PIPED="";
+COLORED="";
+COUNTER=0;
+# ag -i filefoo /bar/
+# ag [FILE-TYPE] [OPTIONS] PATTERN [PATH]
+# ack [OPTION]... PATTERN [FILES OR DIRECTORIES]
+# sift [OPTIONS] PATTERN [FILE|PATH|tcp://HOST:PORT]...
+#  sift [OPTIONS] [-e PATTERN | -f FILE] [FILE|PATH|tcp://HOST:PORT]...
+#  sift [OPTIONS] --targets [FILE|PATH]...
+#      grep [-abcdDEFGHhIiJLlmnOopqRSsUVvwxZ] [-A num] [-B num] [-C[num]] [-e pattern] [-f file]
+#          [--binary-files=value] [--color[=when]] [--colour[=when]] [--context[=num]]
+#          [--label] [--line-buffered] [--null] [pattern] [file ...]
+# In Bash you can also use test -t to check for a terminal:
+
+if [ -t 0 ]; then
+    # Terminal input (keyboard) - interactive
+    PIPED=""
+else
+    # File or pipe input - non-interactive
+    PIPED="YES"
+    # REF: http://stackoverflow.com/questions/2746553/bash-script-read-values-from-stdin-pipe
+    # read PIPED #TOOD Works on mac osx, pending to test in linux and windows
+    PIPED=''
+    # REF: https://stackoverflow.com/questions/7314044/use-bash-to-read-line-by-line-and-keep-space
+    # REF: http://www.unix.com/shell-programming-and-scripting/58611-resetting-ifs-variable.html
+    OLDIFS=$IFS            # resetting IFS variable
+    IFS=''                 # to read line by line and keep space
+    IFS= read -r ONEPIPE   # to avoid interpretation of backslashes.
+    PIPED="${ONEPIPE}"
+        [ ! -z "$PIPED" ] && COUNTER=$((COUNTER+1))
+
+    while read ONEPIPE
+    do
+
+         PIPED="${PIPED}
+${ONEPIPE}"
+         COUNTER=$((COUNTER+1))
+    done
+        if [ $COUNTER -eq 0 ]; then
+          IFS=$OLDIFS
+          exit
+        fi
+
+    #action="${ONEPIPE/ /⃝}"  # replace value inside string substitution expresion bash
+    # TEST: echo "COUNTER: ${COUNTER}";echo "PIDED: ${PIPED}"; exit 0;
+    IFS=$OLDIFS
+fi
+# Piped Input
+#if [ ! -z "$PIPED" ]
+# then
+# echo "this is pipe..die "
+# exit 0;
+#fi
+# NOT Piped Input
+#if [ -z "$PIPED" ]
+# then
+# echo "this NOT pipe..die "
+# exit 0;
+#fi
+#echo "PIPED:$PIPED";
+#exit;
+
+# ALTERNATIVE:
+#if readlink /proc/$$/fd/0 | grep -q "^pipe:"; then
+    # Pipe input (echo abc | myscript)
+#    PIPED="YES"
+#elif file $( readlink /proc/$$/fd/0 ) | grep -q "character special"; then
+    # Terminal input (keyboard)
+#    PIPED=""
+#else
+    # File input (myscript < file.txt)
+#    PIPED=""
+
+#fi
+
+
+# CURRENT SCRIPT EXECUTING
+THISSCRIPTNAME=`basename "$0"`
+
+
+# PIPED ? - END
+
+# ARGUMENTS ? - Start
+
+# check to see if I used a message, then it will behave as a put
+# bash shell script check input argument
+FILENAME=""
+VERBOSE=""
+# Yes argument, not piped
+if [ ! -z "$1" ] && [ -z "$PIPED" ]
+  then
+  {
+    if [[ "$1" == "-v" ]] ;
+      then
+        VERBOSE="ON"
+      else
+        FILENAME="$1";
+     fi
+  }
+fi
+# Yes argument, yes piped
+if [ ! -z "$1" ] && [ ! -z "$PIPED" ]
+  then
+  {
+    if [[ "$1" == "-v" ]] ;
+      then
+        VERBOSE="ON"
+    fi
+    FILENAME="${PIPED}";
+  }
+fi
+
+# Not argument, yes piped
+if [ -z "$1" ] && [ ! -z "$PIPED" ]
+  then
+  {
+    FILENAME="${PIPED}";
+  }
+fi
+# Not argument, not Piped
+if [ -z "$1" ] && [ -z "$PIPED" ]
+  then
+  {
+    echo " "
+    echo " 'Get the chmod numerical value for a file' REF: http://unix.stackexchange.com/questions/46915/get-the-chmod-numerical-value-for-a-file"
+    echo "Missing 1st argument "
+    echo " "
+    echo "Sample Usage:    - expects one argument  *required"
+    echo " "
+    echo "    ${THISSCRIPTNAME}    filename [-v] for verbose"
+    echo "    "
+    echo "Pick one: "
+    echo "    "
+    ls
+    exit 1;
+  }
+fi
+
+# Yes argument, not piped
+if [ ! -z "$2" ]
+  then
+  {
+    if [[ "$2" == "-v" ]] ;
+      then
+        VERBOSE="ON"
+     fi
+  }
+fi
+# ARGUMENTS ? - END
+
+# WHICH SYSTEM AND TAKE ACTION ? - Start
+# check operation systems
+(
+  if [[ "$(uname)" == "Darwin" ]] ; then
+    # Do something under Mac OS X platform
+    while read -r ONE_FILENAME; do
+      # if not empty
+      PERMISIONS=""
+      if [ ! -z "${ONE_FILENAME}" ] ; then
+        PERMISIONS=$(stat -f "%OLp" "${ONE_FILENAME}")
+      fi
+      if [[ "${VERBOSE}" == "ON" ]] ;
+        then
+          {
+            echo "${PERMISIONS} ${ONE_FILENAME}"
+          }
+        else
+          {
+            echo "${PERMISIONS}"
+          }
+      fi
+    done <<< "${FILENAME}"
+
+  elif [[ "$(expr substr $(uname -s) 1 5)" == "Linux" ]] ; then
+    # Do something under GNU/Linux platform
+    while read -r ONE_FILENAME; do
+      # if not empty
+      PERMISIONS=""
+      if [ ! -z "${ONE_FILENAME}" ] ; then
+        PERMISIONS=$(stat --format '%a' "${ONE_FILENAME}")
+      fi
+      if [[ "${VERBOSE}" == "ON" ]] ;
+        then
+          {
+            echo "${PERMISIONS} ${ONE_FILENAME}"
+          }
+        else
+          {
+            echo "${PERMISIONS}"
+          }
+      fi
+    done <<< "${FILENAME}"
+
+  elif [[ "$(expr substr $(uname -s) 1 10)" == "MINGW32_NT" ]] ; then
+    # Do something under Windows NT platform
+     echo "Not learned yet. nothing"
+    # nothing here
+  fi
+)
+# WHICH SYSTEM AND TAKE ACTION ? - END
+
+} # end get_file_chmod
+
 
 # 18:  SIMPLE helloworld echo -e "\033[38;5;18m FOREGROUND   "; echo -e "\033[48;5;18m BACKGROUND   "
 # 19:  SIMPLE helloworld echo -e "\033[38;5;19m FOREGROUND   "; echo -e "\033[48;5;19m BACKGROUND   "
@@ -16,6 +234,9 @@
 # 38:  SIMPLE helloworld echo -e "\033[38;5;38m FOREGROUND   "; echo -e "\033[48;5;38m BACKGROUND   "
 # 39:  SIMPLE helloworld echo -e "\033[38;5;39m FOREGROUND   "; echo -e "\033[48;5;39m BACKGROUND   "
 # 45:  SIMPLE helloworld echo -e "\033[38;5;45m FOREGROUND   "; echo -e "\033[48;5;45m BACKGROUND   "
+
+
+
 echo -en "${RESET}\033[38;5;246m" 2>&1
 
 
