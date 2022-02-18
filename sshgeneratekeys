@@ -1,8 +1,9 @@
-#!/bin/bash
+#!/usr/bin/env bash
 #
 # @author Zeus Intuivo <zeus@intuivo.com>
 #
 #
+echo "Give password for ${USER} to get sudo access."
 sudo echo " Hi"
 
 PROVIDED_USER=""
@@ -37,22 +38,61 @@ fi
 	chmod 600 ${OUTPUT_FOLDER}/authorized_keys
 
 
-read -p "Correct Output File » ${OUTPUT_FOLDER}/${PROVIDED_USER}_rsa »? yes/no: " -n 1 -r
+read -p "Correct Output Files » 
+${OUTPUT_FOLDER}/${PROVIDED_USER}_rsa2048 »? 
+${OUTPUT_FOLDER}/${PROVIDED_USER}_rsa »? 
+${OUTPUT_FOLDER}/${PROVIDED_USER}_ed25519 »? 
+${OUTPUT_FOLDER}/${PROVIDED_USER}_ed25519_sk »? 
+${OUTPUT_FOLDER}/${PROVIDED_USER}_ecdsa_sk »? 
+${OUTPUT_FOLDER}/${PROVIDED_USER}_ed25519_fido2 »? 
+yes/no: " -n 1 -r
 echo    # (optional) move to a new line
 if [[ $REPLY =~ ^[Yy]$ ]]
 then
 
 
-	ssh-keygen -t rsa -b 4096 -C "${EMAIL}" -f ${OUTPUT_FOLDER}/${PROVIDED_USER}_rsa
+	echo 2015 OLD: ssh-keygen -t rsa -b 2048 -C "${EMAIL}" -f "${OUTPUT_FOLDER}/${PROVIDED_USER}_rsa2048"
+	ssh-keygen -t rsa -b 2048 -C "${EMAIL}" -f "${OUTPUT_FOLDER}/${PROVIDED_USER}_rsa2048"
+	echo 2019 OLD: ssh-keygen -t rsa -b 4096 -C "${EMAIL}" -f "${OUTPUT_FOLDER}/${PROVIDED_USER}_rsa"
+	ssh-keygen -t rsa -b 4096 -C "${EMAIL}" -f "${OUTPUT_FOLDER}/${PROVIDED_USER}_rsa"
+	echo 2020 ed25519 OLD: ssh-keygen -t ed25519 -C "${EMAIL}" -f "${OUTPUT_FOLDER}/${PROVIDED_USER}_ed25519"
+	ssh-keygen -t ed25519 -C "${EMAIL}" -f "${OUTPUT_FOLDER}/${PROVIDED_USER}_ed25519"
+	echo 2022 ed25519_sk OLD: ssh-keygen -t ed25519_sk -C "${EMAIL}" -f "${OUTPUT_FOLDER}/${PROVIDED_USER}_ed25519_sk"
+	ssh-keygen -t ed25519_sk -C "${EMAIL}" -f "${OUTPUT_FOLDER}/${PROVIDED_USER}_ed25519_sk"
+	echo 2022 Ecsa OLD: ssh-keygen -t ecdsa_sk  -C "${EMAIL}" -f "${OUTPUT_FOLDER}/${PROVIDED_USER}_ecdsa_sk"
+	ssh-keygen -t ecdsa_sk  -C "${EMAIL}" -f "${OUTPUT_FOLDER}/${PROVIDED_USER}_ecdsa_sk"
+	echo 2022 Fido2 OLD: ssh-keygen  -t ed25519_sk -O resident  -C "${EMAIL}" -f "${OUTPUT_FOLDER}/${PROVIDED_USER}_ed25519_fido2"
+	ssh-keygen -t ed25519_sk -O resident  -C "${EMAIL}" -f "${OUTPUT_FOLDER}/${PROVIDED_USER}_ed25519_fido2"
 
-	chmod 400 ${OUTPUT_FOLDER}/${PROVIDED_USER}_rsa
+	[[ -e "${OUTPUT_FOLDER}/${PROVIDED_USER}_rsa2048" ]] && chmod 400 "${OUTPUT_FOLDER}/${PROVIDED_USER}_rsa2048"
+	[[ -e "${OUTPUT_FOLDER}/${PROVIDED_USER}_rsa2048.pub" ]] && chmod 644 "${OUTPUT_FOLDER}/${PROVIDED_USER}_rsa2048.pub"
+	[[ -e "${OUTPUT_FOLDER}/${PROVIDED_USER}_rsa" ]] && chmod 400 "${OUTPUT_FOLDER}/${PROVIDED_USER}_rsa"
+	[[ -e "${OUTPUT_FOLDER}/${PROVIDED_USER}_rsa.pub" ]] && chmod 644 "${OUTPUT_FOLDER}/${PROVIDED_USER}_rsa.pub"
+	[[ -e "${OUTPUT_FOLDER}/${PROVIDED_USER}_ed25519" ]] && chmod 400 "${OUTPUT_FOLDER}/${PROVIDED_USER}_ed25519"
+	[[ -e "${OUTPUT_FOLDER}/${PROVIDED_USER}_ed25519.pub" ]] && chmod 644 "${OUTPUT_FOLDER}/${PROVIDED_USER}_ed25519.pub"
+	[[ -e "${OUTPUT_FOLDER}/${PROVIDED_USER}_ed25519_sk" ]] && chmod 400 "${OUTPUT_FOLDER}/${PROVIDED_USER}_ed25519_sk"
+	[[ -e "${OUTPUT_FOLDER}/${PROVIDED_USER}_ed25519_sk.pub" ]] && chmod 400 "${OUTPUT_FOLDER}/${PROVIDED_USER}_ed25519_sk.pub"
+	[[ -e "${OUTPUT_FOLDER}/${PROVIDED_USER}_ecdsa_sk" ]] && chmod 400 "${OUTPUT_FOLDER}/${PROVIDED_USER}_ecdsa_sk"
+	[[ -e "${OUTPUT_FOLDER}/${PROVIDED_USER}_ecdsa_sk.pub" ]] && chmod 644 "${OUTPUT_FOLDER}/${PROVIDED_USER}_ecdsa_sk.pub"
+	[[ -e "${OUTPUT_FOLDER}/${PROVIDED_USER}_ed25519_fido2" ]] && chmod 400 "${OUTPUT_FOLDER}/${PROVIDED_USER}_ed25519_fido2"
+	[[ -e "${OUTPUT_FOLDER}/${PROVIDED_USER}_ed25519_fido2.pub" ]] && chmod 644 "${OUTPUT_FOLDER}/${PROVIDED_USER}_ed25519_fido2.pub"
 	#chmod 600 ${OUTPUT_FOLDER}/${PROVIDED_USER}_rsa
 
-	cat ${OUTPUT_FOLDER}/${PROVIDED_USER}_rsa.pub >> ${OUTPUT_FOLDER}/authorized_keys
+	[[ -e "${OUTPUT_FOLDER}/${PROVIDED_USER}_rsa.pub" ]] && cat "${OUTPUT_FOLDER}/${PROVIDED_USER}_rsa.pub" >> "${OUTPUT_FOLDER}/authorized_keys"
+	[[ -e "${OUTPUT_FOLDER}/${PROVIDED_USER}_rsa2048.pub" ]] && cat "${OUTPUT_FOLDER}/${PROVIDED_USER}_rsa2048.pub" >> "${OUTPUT_FOLDER}/authorized_keys"
+	[[ -e "${OUTPUT_FOLDER}/${PROVIDED_USER}_ed25519.pub" ]] && cat "${OUTPUT_FOLDER}/${PROVIDED_USER}_ed25519.pub" >> "${OUTPUT_FOLDER}/authorized_keys"
+	[[ -e "${OUTPUT_FOLDER}/${PROVIDED_USER}_ed25519_sk.pub" ]] && cat "${OUTPUT_FOLDER}/${PROVIDED_USER}_ed25519_sk.pub" >> "${OUTPUT_FOLDER}/authorized_keys"
+	[[ -e "${OUTPUT_FOLDER}/${PROVIDED_USER}_ed25519_fido2.pub" ]] && cat "${OUTPUT_FOLDER}/${PROVIDED_USER}_ed25519_fido2.pub" >> "${OUTPUT_FOLDER}/authorized_keys"
+	[[ -e "${OUTPUT_FOLDER}/${PROVIDED_USER}_ecdsa_sk.pub" ]] && cat "${OUTPUT_FOLDER}/${PROVIDED_USER}_ecdsa_sk.pub" >> "${OUTPUT_FOLDER}/authorized_keys"
 
-	chmod 600 ${OUTPUT_FOLDER}/authorized_keys
+	chmod 600 "${OUTPUT_FOLDER}/authorized_keys"
 
-	ssh-add ${OUTPUT_FOLDER}/${PROVIDED_USER}_rsa
+	[[ -e "${OUTPUT_FOLDER}/${PROVIDED_USER}_rsa2048" ]] && ssh-add "${OUTPUT_FOLDER}/${PROVIDED_USER}_rsa2048"
+	[[ -e "${OUTPUT_FOLDER}/${PROVIDED_USER}_rsa" ]] && ssh-add "${OUTPUT_FOLDER}/${PROVIDED_USER}_rsa"
+	[[ -e "${OUTPUT_FOLDER}/${PROVIDED_USER}_ed25519" ]] && ssh-add "${OUTPUT_FOLDER}/${PROVIDED_USER}_ed25519"
+	[[ -e "${OUTPUT_FOLDER}/${PROVIDED_USER}_ed25519_sk" ]] && ssh-add "${OUTPUT_FOLDER}/${PROVIDED_USER}_ed25519_sk"
+	[[ -e "${OUTPUT_FOLDER}/${PROVIDED_USER}_ed25519_fido2" ]] && ssh-add "${OUTPUT_FOLDER}/${PROVIDED_USER}_ed25519_fido2"
+	[[ -e "${OUTPUT_FOLDER}/${PROVIDED_USER}_ecdsa_sk" ]] && ssh-add "${OUTPUT_FOLDER}/${PROVIDED_USER}_ecdsa_sk"
 
 	ssh-add -l  || ssh-add -l -E md5
 
@@ -60,60 +100,83 @@ then
 
 
 function cpy {
-# REF: https://superuser.com/questions/472598/pbcopy-for-windows
-# I'm using the Git Bash command shell for Windows, and as someone noted above,
-# using clip is very annoying, because it also copies the carriage return at the
-# end of the output of any command. So I wrote this function to address it:
-#
-# So for example:
-#
-# $ pwd | cpy  # copies directory path
-#
-# $ git branch | cpy # copies current branch of git repo to clipboard
-#
-while read data; do     # reads data piped in to cpy
-    echo "$data" | cat > /dev/clipboard     # echos the data and writes that to /dev/clipboard
-done
-tr -d '\n' < /dev/clipboard > /dev/clipboard     # removes new lines from the clipboard
-}
+	# REF: https://superuser.com/questions/472598/pbcopy-for-windows
+	# I'm using the Git Bash command shell for Windows, and as someone noted above,
+	# using clip is very annoying, because it also copies the carriage return at the
+	# end of the output of any command. So I wrote this function to address it:
+	#
+	# So for example:
+	#
+	# $ pwd | cpy  # copies directory path
+	#
+	# $ git branch | cpy # copies current branch of git repo to clipboard
+	#
+	while read data; do     # reads data piped in to cpy
+	    echo "$data" | cat > /dev/clipboard     # echos the data and writes that to /dev/clipboard
+	done
+	tr -d '\n' < /dev/clipboard > /dev/clipboard     # removes new lines from the clipboard
+} # end cpy
 
 
 function copy_to_clipboard() {
 	# check operation systems
 	if [[ "$(uname)" == "Darwin" ]] ; then
 	  # Do something under Mac OS X platform
-	  pbcopy < ${OUTPUT_FOLDER}/${PROVIDED_USER}_rsa.pub
-	  if [ $0 == 0 ] ; then
+	  # pbcopy < ${OUTPUT_FOLDER}/${PROVIDED_USER}_rsa.pub
+	  echo "tr -d '\n' < \"${OUTPUT_FOLDER}/${PROVIDED_USER}_rsa2048.pub\" | pbcopy"
+	  echo "tr -d '\n' < \"${OUTPUT_FOLDER}/${PROVIDED_USER}_rsa.pub\" | pbcopy"
+	  echo "tr -d '\n' < \"${OUTPUT_FOLDER}/${PROVIDED_USER}_ed25519.pub\" | pbcopy"
+	  echo "tr -d '\n' < \"${OUTPUT_FOLDER}/${PROVIDED_USER}_ed25519_sk.pub\" | pbcopy"
+	  echo "tr -d '\n' < \"${OUTPUT_FOLDER}/${PROVIDED_USER}_ed25519_fido2.pub\" | pbcopy"
+	  echo "tr -d '\n' < \"${OUTPUT_FOLDER}/${PROVIDED_USER}_ecdsa_sk.pub\" | pbcopy"
+	  tr -d '\n' < "${OUTPUT_FOLDER}/${PROVIDED_USER}_rsa.pub" | pbcopy
+	  _err=$?
+	  if [ ${_err} -ne 0 ] ; then
 		  echo "The new key was copied to your clipboard"
 	  else
 		  echo "Could not copy to clipboard. Missing pbcopy."
-		  echo "You new key is located in ${OUTPUT_FOLDER}/${PROVIDED_USER}_rsa.pub"
+		  echo "Your new keys are located in ${OUTPUT_FOLDER}/"
+		  ls -la "${OUTPUT_FOLDER}/${PROVIDED_USER}_*"
 	  fi
 	elif [[ "$(expr substr $(uname -s) 1 5)" == "Linux" ]] ; then
 	  # Do something under GNU/Linux platform
 	  # ubuntu lsb_release -i | sed 's/Distributor\ ID://g' = \tUbuntu\n
-	  xclip -sel clip < ${OUTPUT_FOLDER}/${PROVIDED_USER}_rsa.pub
-	  if [ $0 == 0 ] ; then
+	  echo "xclip -sel clip < \"${OUTPUT_FOLDER}/${PROVIDED_USER}_rsa2048.pub\" "
+	  echo "xclip -sel clip < \"${OUTPUT_FOLDER}/${PROVIDED_USER}_rsa.pub\" "
+	  echo "xclip -sel clip < \"${OUTPUT_FOLDER}/${PROVIDED_USER}_ed25519.pub\" "
+	  echo "xclip -sel clip < \"${OUTPUT_FOLDER}/${PROVIDED_USER}_ed25519_sk.pub\" "
+	  echo "xclip -sel clip < \"${OUTPUT_FOLDER}/${PROVIDED_USER}_ed25519_fido2.pub\" "
+	  echo "xclip -sel clip < \"${OUTPUT_FOLDER}/${PROVIDED_USER}_ecdsa_sk.pub\" "
+	  xclip -sel clip < "${OUTPUT_FOLDER}/${PROVIDED_USER}_rsa.pub"
+	  _err=$?
+	  if [ ${_err} -ne 0 ] ; then
 		  echo "The new key was copied to your clipboard"
 	  else
 		  echo "Could not copy to clipboard. Missing xclip."
-		  echo "You new key is located in ${OUTPUT_FOLDER}/${PROVIDED_USER}_rsa.pub"
+		  echo "Your new keys are located in ${OUTPUT_FOLDER}/"
+		  ls -la "${OUTPUT_FOLDER}/${PROVIDED_USER}_*"
 	  fi
 	elif [[ "$(expr substr $(uname -s) 1 10)" == "MINGW32_NT" ]] ; then
 	  # Do something under Windows NT platform
-	  cat ${OUTPUT_FOLDER}/${PROVIDED_USER}_rsa.pub | cpy
-	  # cat ~/.ssh/id_rsa.pub | clip
-	  # nothing here
-	  if [ $0 == 0 ] ; then
+	  echo "cat \"${OUTPUT_FOLDER}/${PROVIDED_USER}_rsa2048.pub\" | clip"
+	  echo "cat \"${OUTPUT_FOLDER}/${PROVIDED_USER}_rsa.pub\" | clip"
+	  echo "cat \"${OUTPUT_FOLDER}/${PROVIDED_USER}_ed25519.pub\" | clip"
+	  echo "cat \"${OUTPUT_FOLDER}/${PROVIDED_USER}_ed25519_sk.pub\" | clip"
+	  echo "cat \"${OUTPUT_FOLDER}/${PROVIDED_USER}_ed25519_fido2.pub\" | clip"
+	  echo "cat \"${OUTPUT_FOLDER}/${PROVIDED_USER}_ecdsa_sk.pub\" | clip"
+	  cat "${OUTPUT_FOLDER}/${PROVIDED_USER}_rsa.pub" | cpy
+	  _err=$?
+	  if [ ${_err} -ne 0 ] ; then
 		  echo "The new key was copied to your clipboard"
 	  else
 		  echo "Could not copy to clipboard."
-		  echo "You new key is located in ${OUTPUT_FOLDER}/${PROVIDED_USER}_rsa.pub"
+		  echo "Your new keys are located in ${OUTPUT_FOLDER}/"
+		  ls -la "${OUTPUT_FOLDER}/${PROVIDED_USER}_*"
 	  fi
 	fi
 
-}
+} # end copy_to_clipboard
 
-
+copy_to_clipboard
 
 fi

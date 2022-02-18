@@ -269,7 +269,7 @@ if [ -z "$PIPED" ] ; then
   fi
   if  ( env | grep "SUDO_USER"  &>/dev/null  ) || [[ -z "${SUDO_USER}" ]] ; then
   {
-
+    echo "Give password for ${USER} to get sudo access."
     sudo echo -n "Hey! sudo "
     echo -e "\033[38;0m "
     # USER=root
@@ -404,6 +404,23 @@ fi
 OUTPUT_FOLDER="$(pwd)"
 (( DEBUG )) && echo -e "\033[38;5;25m" 2>&1
 [[ ! -f "${OUTPUT_FOLDER}/${PROVIDED_USER}_rsa" ]] && echo -e "\n  Error this key does not exist. Pick from key on the list: \n ${KEYLIST} \n" && exit 1
+
+
+# _2048
+sudo chmod 700 "${OUTPUT_FOLDER}/id_rsa2048.pub"
+sudo chmod 700 "${OUTPUT_FOLDER}/id_rsa2048"
+sudo chown -R "${SUDO_USER}" "${OUTPUT_FOLDER}/id_rsa2048.pub"
+sudo chown -R "${SUDO_USER}" "${OUTPUT_FOLDER}/id_rsid_rsa2048a"
+
+sudo chmod 700 "${OUTPUT_FOLDER}/${PROVIDED_USER}_rsa2048.pub"
+sudo chmod 700 "${OUTPUT_FOLDER}/${PROVIDED_USER}_rsa2048"
+sudo chown -R "${SUDO_USER}" "${OUTPUT_FOLDER}/${PROVIDED_USER}_rsa2048.pub"
+sudo chown -R "${SUDO_USER}" "${OUTPUT_FOLDER}/${PROVIDED_USER}_rsa2048"
+
+sudo cp "${OUTPUT_FOLDER}/${PROVIDED_USER}_rsa2048.pub" "${OUTPUT_FOLDER}/id_rsa2048.pub"
+sudo cp "${OUTPUT_FOLDER}/${PROVIDED_USER}_rsa2048" "${OUTPUT_FOLDER}/id_rsa2048"
+
+# _rsa _4096
 sudo chmod 700 "${OUTPUT_FOLDER}/id_rsa.pub"
 sudo chmod 700 "${OUTPUT_FOLDER}/id_rsa"
 sudo chown -R "${SUDO_USER}" "${OUTPUT_FOLDER}/id_rsa.pub"
@@ -417,10 +434,71 @@ sudo chown -R "${SUDO_USER}" "${OUTPUT_FOLDER}/${PROVIDED_USER}_rsa"
 sudo cp "${OUTPUT_FOLDER}/${PROVIDED_USER}_rsa.pub" "${OUTPUT_FOLDER}/id_rsa.pub"
 sudo cp "${OUTPUT_FOLDER}/${PROVIDED_USER}_rsa" "${OUTPUT_FOLDER}/id_rsa"
 
-sudo chmod 700 "${OUTPUT_FOLDER}/id_rsa.pub"
-sudo chmod 700 "${OUTPUT_FOLDER}/id_rsa"
-sudo chown -R "${SUDO_USER}" "${OUTPUT_FOLDER}/id_rsa.pub"
-sudo chown -R "${SUDO_USER}" "${OUTPUT_FOLDER}/id_rsa"
+# _ed25519
+sudo chmod 700 "${OUTPUT_FOLDER}/id_ed25519.pub"
+sudo chmod 700 "${OUTPUT_FOLDER}/id_ed25519"
+sudo chown -R "${SUDO_USER}" "${OUTPUT_FOLDER}/id_ed25519.pub"
+sudo chown -R "${SUDO_USER}" "${OUTPUT_FOLDER}/id_ed25519"
+
+sudo chmod 700 "${OUTPUT_FOLDER}/${PROVIDED_USER}_ed25519.pub"
+sudo chmod 700 "${OUTPUT_FOLDER}/${PROVIDED_USER}_ed25519"
+sudo chown -R "${SUDO_USER}" "${OUTPUT_FOLDER}/${PROVIDED_USER}_ed25519.pub"
+sudo chown -R "${SUDO_USER}" "${OUTPUT_FOLDER}/${PROVIDED_USER}_ed25519"
+
+sudo cp "${OUTPUT_FOLDER}/${PROVIDED_USER}_ed25519.pub" "${OUTPUT_FOLDER}/id_ed25519.pub"
+sudo cp "${OUTPUT_FOLDER}/${PROVIDED_USER}_ed25519" "${OUTPUT_FOLDER}/id_ed25519"
+
+# _ed25519_sk
+sudo chmod 700 "${OUTPUT_FOLDER}/id_ed25519_sk.pub"
+sudo chmod 700 "${OUTPUT_FOLDER}/id_ed25519_sk"
+sudo chown -R "${SUDO_USER}" "${OUTPUT_FOLDER}/id_ed25519_sk.pub"
+sudo chown -R "${SUDO_USER}" "${OUTPUT_FOLDER}/id_ed25519_sk"
+
+sudo chmod 700 "${OUTPUT_FOLDER}/${PROVIDED_USER}_ed25519_sk.pub"
+sudo chmod 700 "${OUTPUT_FOLDER}/${PROVIDED_USER}_ed25519_sk"
+sudo chown -R "${SUDO_USER}" "${OUTPUT_FOLDER}/${PROVIDED_USER}_ed25519_sk.pub"
+sudo chown -R "${SUDO_USER}" "${OUTPUT_FOLDER}/${PROVIDED_USER}_ed25519_sk"
+
+sudo cp "${OUTPUT_FOLDER}/${PROVIDED_USER}_ed25519_sk.pub" "${OUTPUT_FOLDER}/id_ed25519_sk.pub"
+sudo cp "${OUTPUT_FOLDER}/${PROVIDED_USER}_ed25519_sk" "${OUTPUT_FOLDER}/id_ed25519_sk"
+
+# _ecdsa_sk
+sudo chmod 700 "${OUTPUT_FOLDER}/id_ecdsa_sk.pub"
+sudo chmod 700 "${OUTPUT_FOLDER}/id_ecdsa_sk"
+sudo chown -R "${SUDO_USER}" "${OUTPUT_FOLDER}/id_ecdsa_sk.pub"
+sudo chown -R "${SUDO_USER}" "${OUTPUT_FOLDER}/id_ecdsa_sk"
+
+sudo chmod 700 "${OUTPUT_FOLDER}/${PROVIDED_USER}_ecdsa_sk.pub"
+sudo chmod 700 "${OUTPUT_FOLDER}/${PROVIDED_USER}_ecdsa_sk"
+sudo chown -R "${SUDO_USER}" "${OUTPUT_FOLDER}/${PROVIDED_USER}_ecdsa_sk.pub"
+sudo chown -R "${SUDO_USER}" "${OUTPUT_FOLDER}/${PROVIDED_USER}_ecdsa_sk"
+
+sudo cp "${OUTPUT_FOLDER}/${PROVIDED_USER}_ecdsa_sk.pub" "${OUTPUT_FOLDER}/id_ecdsa_sk.pub"
+sudo cp "${OUTPUT_FOLDER}/${PROVIDED_USER}_ecdsa_sk" "${OUTPUT_FOLDER}/id_ecdsa_sk"
+
+sudo chmod 700 "${OUTPUT_FOLDER}/id_ecdsa_sk.pub"
+sudo chmod 700 "${OUTPUT_FOLDER}/id_ecdsa_sk"
+sudo chown -R "${SUDO_USER}" "${OUTPUT_FOLDER}/id_ecdsa_sk.pub"
+sudo chown -R "${SUDO_USER}" "${OUTPUT_FOLDER}/id_ecdsa_sk"
+
+# _ed25519_fido2
+sudo chmod 700 "${OUTPUT_FOLDER}/id_ed25519_fido2.pub"
+sudo chmod 700 "${OUTPUT_FOLDER}/id_ed25519_fido2"
+sudo chown -R "${SUDO_USER}" "${OUTPUT_FOLDER}/id_ed25519_fido2.pub"
+sudo chown -R "${SUDO_USER}" "${OUTPUT_FOLDER}/id_ed25519_fido2"
+
+sudo chmod 700 "${OUTPUT_FOLDER}/${PROVIDED_USER}_ed25519_fido2.pub"
+sudo chmod 700 "${OUTPUT_FOLDER}/${PROVIDED_USER}_ed25519_fido2"
+sudo chown -R "${SUDO_USER}" "${OUTPUT_FOLDER}/${PROVIDED_USER}_ed25519_fido2.pub"
+sudo chown -R "${SUDO_USER}" "${OUTPUT_FOLDER}/${PROVIDED_USER}_ed25519_fido2"
+
+sudo cp "${OUTPUT_FOLDER}/${PROVIDED_USER}_ed25519_fido2.pub" "${OUTPUT_FOLDER}/id_ed25519_fido2.pub"
+sudo cp "${OUTPUT_FOLDER}/${PROVIDED_USER}_ed25519_fido2" "${OUTPUT_FOLDER}/id_ed25519_fido2"
+
+sudo chmod 700 "${OUTPUT_FOLDER}/id_ed25519_fido2.pub"
+sudo chmod 700 "${OUTPUT_FOLDER}/id_ed25519_fido2"
+sudo chown -R "${SUDO_USER}" "${OUTPUT_FOLDER}/id_ed25519_fido2.pub"
+sudo chown -R "${SUDO_USER}" "${OUTPUT_FOLDER}/id_ed25519_fido2"
 
 (( DEBUG )) && echo chmod 1 get_file_chmod "${OUTPUT_FOLDER}"
 get_file_chmod "${OUTPUT_FOLDER}"  &>/dev/null
@@ -450,11 +528,31 @@ enforce_variable_with_value USERNAME "${USERNAME}"
 (( DEBUG )) && echo -e "\033[38;5;26m" 2>&1
 (( DEBUG )) && echo "${USERNAME}";
 #ssh -vT git@github.com
+sudo chmod 644 "${OUTPUT_FOLDER}/id_rsa2048.pub"
+sudo chmod 600 "${OUTPUT_FOLDER}/id_rsa2048"
 sudo chmod 644 "${OUTPUT_FOLDER}/id_rsa.pub"
 sudo chmod 600 "${OUTPUT_FOLDER}/id_rsa"
+sudo chmod 644 "${OUTPUT_FOLDER}/id_ed25519.pub"
+sudo chmod 600 "${OUTPUT_FOLDER}/id_ed25519"
+sudo chmod 644 "${OUTPUT_FOLDER}/id_ed25519_sk.pub"
+sudo chmod 600 "${OUTPUT_FOLDER}/id_ed25519_sk"
+sudo chmod 644 "${OUTPUT_FOLDER}/id_ecdsa_sk.pub"
+sudo chmod 600 "${OUTPUT_FOLDER}/id_ecdsa_sk"
+sudo chmod 644 "${OUTPUT_FOLDER}/id_ed25519_fido2.pub"
+sudo chmod 600 "${OUTPUT_FOLDER}/id_ed25519_fido2"
 # Assuming USER is root with sudo
+sudo chown -R "${SUDO_USER}" "${OUTPUT_FOLDER}/id_rsa2048.pub"
+sudo chown -R "${SUDO_USER}" "${OUTPUT_FOLDER}/id_rsa2048"
 sudo chown -R "${SUDO_USER}" "${OUTPUT_FOLDER}/id_rsa.pub"
 sudo chown -R "${SUDO_USER}" "${OUTPUT_FOLDER}/id_rsa"
+sudo chown -R "${SUDO_USER}" "${OUTPUT_FOLDER}/id_ed25519.pub"
+sudo chown -R "${SUDO_USER}" "${OUTPUT_FOLDER}/id_ed25519"
+sudo chown -R "${SUDO_USER}" "${OUTPUT_FOLDER}/id_ed25519_sk.pub"
+sudo chown -R "${SUDO_USER}" "${OUTPUT_FOLDER}/id_ed25519_sk"
+sudo chown -R "${SUDO_USER}" "${OUTPUT_FOLDER}/id_ecdsa_sk.pub"
+sudo chown -R "${SUDO_USER}" "${OUTPUT_FOLDER}/id_ecdsa_sk"
+sudo chown -R "${SUDO_USER}" "${OUTPUT_FOLDER}/id_ed25519_fido2.pub"
+sudo chown -R "${SUDO_USER}" "${OUTPUT_FOLDER}/id_ed25519_fido2"
 
 
 
@@ -532,7 +630,12 @@ sudo chown -R "${SUDO_USER}" "${OUTPUT_FOLDER}/id_rsa"
 	  wait
 	  (( DEBUG )) && echo -e "\033[38;5;33m"
 	  (( DEBUG )) && echo "Adding just the only key we want to use."
-	  sudo ssh-add -K "${OUTPUT_FOLDER}/id_rsa"
+	  [[ -e "${OUTPUT_FOLDER}/id_rsa2048" ]] && sudo ssh-add -K "${OUTPUT_FOLDER}/id_rsa2048"
+    [[ -e "${OUTPUT_FOLDER}/id_rsa" ]] && sudo ssh-add -K "${OUTPUT_FOLDER}/id_rsa"
+    [[ -e "${OUTPUT_FOLDER}/_ed25519" ]] && sudo ssh-add -K "${OUTPUT_FOLDER}/_ed25519"
+    [[ -e "${OUTPUT_FOLDER}/_ed25519_sk" ]] && sudo ssh-add -K "${OUTPUT_FOLDER}/_ed25519_sk"
+    [[ -e "${OUTPUT_FOLDER}/_ed25519_fido2" ]] && sudo ssh-add -K "${OUTPUT_FOLDER}/_ed25519_fido2"
+    [[ -e "${OUTPUT_FOLDER}/_ecdsa_sk" ]] && sudo ssh-add -K "${OUTPUT_FOLDER}/_ecdsa_sk"
 
      (( FLAGGITPROVIDER )) &&  [[ "${TEST_GIT}" ==  *"Permission denied"* ]] && $(pbcopy < ${OUTPUT_FOLDER}/${PROVIDED_USER}_rsa.pub)  && echo "------ Key Needs to be added in WebPAGE. Copied to CLipboard"
   }
@@ -553,11 +656,31 @@ sudo chown -R "${SUDO_USER}" "${OUTPUT_FOLDER}/id_rsa"
   }
 	fi
 
-sudo chmod 400 "${OUTPUT_FOLDER}/${PROVIDED_USER}_rsa.pub"
+sudo chmod 644 "${OUTPUT_FOLDER}/${PROVIDED_USER}_rsa2048.pub"
+sudo chmod 400 "${OUTPUT_FOLDER}/${PROVIDED_USER}_rsa2048"
+sudo chmod 644 "${OUTPUT_FOLDER}/${PROVIDED_USER}_rsa.pub"
 sudo chmod 400 "${OUTPUT_FOLDER}/${PROVIDED_USER}_rsa"
+sudo chmod 644 "${OUTPUT_FOLDER}/${PROVIDED_USER}_ed25519.pub"
+sudo chmod 400 "${OUTPUT_FOLDER}/${PROVIDED_USER}_ed25519"
+sudo chmod 644 "${OUTPUT_FOLDER}/${PROVIDED_USER}_ed25519_sk.pub"
+sudo chmod 400 "${OUTPUT_FOLDER}/${PROVIDED_USER}_ed25519_sk"
+sudo chmod 644 "${OUTPUT_FOLDER}/${PROVIDED_USER}_ed25519_fido2.pub"
+sudo chmod 400 "${OUTPUT_FOLDER}/${PROVIDED_USER}_ed25519_fido2"
+sudo chmod 644 "${OUTPUT_FOLDER}/${PROVIDED_USER}_ecdsa_sk.pub"
+sudo chmod 400 "${OUTPUT_FOLDER}/${PROVIDED_USER}_ecdsa_sk"
 # Assuming USER is root with sudo
+sudo chown -R "${USER}" "${OUTPUT_FOLDER}/${PROVIDED_USER}_rsa2048.pub"
+sudo chown -R "${USER}" "${OUTPUT_FOLDER}/${PROVIDED_USER}_rsa"
 sudo chown -R "${USER}" "${OUTPUT_FOLDER}/${PROVIDED_USER}_rsa.pub"
 sudo chown -R "${USER}" "${OUTPUT_FOLDER}/${PROVIDED_USER}_rsa"
+sudo chown -R "${USER}" "${OUTPUT_FOLDER}/${PROVIDED_USER}_ed25519.pub"
+sudo chown -R "${USER}" "${OUTPUT_FOLDER}/${PROVIDED_USER}_ed25519"
+sudo chown -R "${USER}" "${OUTPUT_FOLDER}/${PROVIDED_USER}_ed25519_sk.pub"
+sudo chown -R "${USER}" "${OUTPUT_FOLDER}/${PROVIDED_USER}_ed25519_sk"
+sudo chown -R "${USER}" "${OUTPUT_FOLDER}/${PROVIDED_USER}_ed25519_fido2.pub"
+sudo chown -R "${USER}" "${OUTPUT_FOLDER}/${PROVIDED_USER}_ed25519_fido2"
+sudo chown -R "${USER}" "${OUTPUT_FOLDER}/${PROVIDED_USER}_ecdsa_sk.pub"
+sudo chown -R "${USER}" "${OUTPUT_FOLDER}/${PROVIDED_USER}_ecdsa_sk"
 
 if  (( FLAGGITPROVIDER )) &&  [[ "${TEST_GIT}" ==  *"successfully authenticated"* ]] ; then
 {
