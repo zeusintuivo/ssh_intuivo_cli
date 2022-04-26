@@ -405,7 +405,7 @@ OUTPUT_FOLDER="$(pwd)"
 (( DEBUG )) && echo -e "\033[38;5;25m" 2>&1
 [[ ! -f "${OUTPUT_FOLDER}/${PROVIDED_USER}_rsa" ]] && echo -e "\n  Error this key does not exist. Pick from key on the list: \n ${KEYLIST} \n" && exit 1
 
-
+# DEBUG=1
 # _2048
 [[ -e "${OUTPUT_FOLDER}/id_rsa2048.pub" ]] && sudo chmod 700 "${OUTPUT_FOLDER}/id_rsa2048.pub"
 [[ -e "${OUTPUT_FOLDER}/id_rsa2048" ]] && sudo chmod 700 "${OUTPUT_FOLDER}/id_rsa2048"
@@ -630,11 +630,17 @@ enforce_variable_with_value USERNAME "${USERNAME}"
 	  wait
 	  (( DEBUG )) && echo -e "\033[38;5;33m"
 	  (( DEBUG )) && echo "Adding just the only key we want to use."
+	  (( DEBUG )) && echo "${OUTPUT_FOLDER}/id_rsa2048 needs pin"
 	  [[ -e "${OUTPUT_FOLDER}/id_rsa2048" ]] && sudo ssh-add -K "${OUTPUT_FOLDER}/id_rsa2048"
+	  (( DEBUG )) && echo "${OUTPUT_FOLDER}/id_rsa needs pin"
     [[ -e "${OUTPUT_FOLDER}/id_rsa" ]] && sudo ssh-add -K "${OUTPUT_FOLDER}/id_rsa"
+	  (( DEBUG )) && echo "${OUTPUT_FOLDER}/_ed25519"
     [[ -e "${OUTPUT_FOLDER}/_ed25519" ]] && sudo ssh-add -K "${OUTPUT_FOLDER}/_ed25519"
+	  (( DEBUG )) && echo "${OUTPUT_FOLDER}/_ed25519_sk"
     [[ -e "${OUTPUT_FOLDER}/_ed25519_sk" ]] && sudo ssh-add -K "${OUTPUT_FOLDER}/_ed25519_sk"
+	  (( DEBUG )) && echo "${OUTPUT_FOLDER}/_ed25519_fido2"
     [[ -e "${OUTPUT_FOLDER}/_ed25519_fido2" ]] && sudo ssh-add -K "${OUTPUT_FOLDER}/_ed25519_fido2"
+	  (( DEBUG )) && echo "${OUTPUT_FOLDER}/_ecdsa_sk"
     [[ -e "${OUTPUT_FOLDER}/_ecdsa_sk" ]] && sudo ssh-add -K "${OUTPUT_FOLDER}/_ecdsa_sk"
 
      (( FLAGGITPROVIDER )) &&  [[ "${TEST_GIT}" ==  *"Permission denied"* ]] && $(pbcopy < ${OUTPUT_FOLDER}/${PROVIDED_USER}_rsa.pub)  && echo "------ Key Needs to be added in WebPAGE. Copied to CLipboard"
