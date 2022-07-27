@@ -3,6 +3,105 @@
 # @author Zeus Intuivo <zeus@intuivo.com>
 #
 #
+install_lsof() {
+  GIT_SSL_NO_VERIFY=true git clone https://github.com/lsof-org/lsof.git "$HOME/.lsof"
+  cd "$HOME/.lsof"
+	if [[ "$(uname)" == "Darwin" ]] ; then
+	{
+	  echo "# mac lsof"
+	  ./Configure darwin
+	}
+	elif [[ "$(uname)" == "freebsd" ]] ; then
+	{
+	  echo "# freebsd lsof"
+	  ./Configure freebsd
+	}
+	else
+	{
+	  echo "# linux lsof"
+	  ./Configure linux
+	}
+	fi
+  make
+  make dist
+  make install
+  ln -sf "$HOME/.lsof/lsof" /usr/local/bin/lsof
+  chmod a+x "$HOME/.lsof/lsof"
+} # end install_lsof
+check_port_sudo(){
+    local port="${1}"
+    local service="${2}"
+    echo "Require sudo to explore more on ports:"
+    local response=""
+    local -i _err=0
+    if ! command -v lsof >/dev/null 2>&1 ; then
+    {
+      echo -e "${RED} lsof  -- Command is not responding. Attempting to install -- compile "
+      install_lsof
+      _err=$?
+      [ $_err -gt 0 ] && echo -e "${RED} Failed to install lsof -- cannot check is port 22 is open "
+      [ $_err -gt 0 ] && exit 1
+    }
+    fi
+    response="$(lsof -n -i:${port} | grep LISTEN 2>&1 )" # whats_listening
+    if [[ -n "${response}" ]] && [[ "${response}" == *"${service}"* ]] ; then
+    {
+      echo -e "${GREEN} PORT ${port} -- The ${service} port seems responding "
+      return 0
+    }
+    else
+    {
+      if enforce_web_is_reachable "github.com"  ;  then # if not empty
+      {
+         echo -e "${GREEN} PORT ${port} -- ${RED} Seems NOT ${GREEN} responding but  ${RED} github.com ${GREEN} can be reached "
+         return 0
+      }
+      else
+      {
+        echo -e "${RED} ERROR ${service} NOT open PORT ${port}. And github.com cannot be reached "
+        exit 1
+      }
+      fi
+    }
+    fi
+
+} # end check_port_sudo
+check_port(){
+  local port="${1}"
+  local service="${2}"
+# exec 6<>/dev/tcp/ip.addr.of.server/27017
+# echo -e "GET / HTTP/1.0\n" >&6
+# cat <&6
+
+# exit 0
+
+# linux
+# netstat -lnt | awk '$6 == "LISTEN" && $4 ~ /\.27017$/'
+# mac
+# netstat -ant tcp | awk '$6 == "LISTEN" && $4 ~ /\.27017$/'
+if [[ "$(uname)" == "Darwin" ]] ; then
+{
+  echo "# mac netstat"
+  if ! (netstat -ant tcp | awk '$6 == "LISTEN" && $4 ~ /\.'${port}'$/' >/dev/null 2>&1 ); then
+    echo -e "${GREEN} PORT ${port} -- The ${service} port seems responding "
+  else
+    check_port_sudo ${port} ${service}
+  fi
+}
+else
+{
+  echo "# linux netstat"
+  if ! (netstat -lnt | awk '$6 == "LISTEN" && $4 ~ /\.'${port}'$/' >/dev/null 2>&1 ); then
+    echo -e "${GREEN} PORT ${port} -- The ${service} port seems responding "
+  else
+    check_port_sudo ${port} ${service}
+  fi
+}
+fi
+
+
+} # end check_port
+
 function get_file_chmod() {
   #!/bin/bash
 #
@@ -555,11 +654,12 @@ enforce_variable_with_value USERNAME "${USERNAME}"
 [[ -e "${OUTPUT_FOLDER}/id_ed25519_fido2" ]] && sudo chown -R "${SUDO_USER}" "${OUTPUT_FOLDER}/id_ed25519_fido2"
 
 
-
+check_port 22 ssh
 # (( DEBUG )) && enforce_variable_with_value GITPROVIDER "${GITPROVIDER}"
           if ( typeset -p "GITPROVIDER"  &>/dev/null ) &&  [ -n "${GITPROVIDER+x}" ] ; then
           {
             (( DEBUG )) && echo -e "${LIGHTGREEN} ✔ ${LIGHTYELLOW} ${GITPROVIDER} is given "
+            echo -e "${LIGHTGREEN} ✔ ${LIGHTYELLOW} ${GITPROVIDER} Outbound call to port 22. "
             TEST_GIT=""
             (( FLAGGITPROVIDER )) && (( DEBUG )) && echo "ssh -T ${GITPROVIDER}"
             (( FLAGGITPROVIDER )) && TEST_GIT=$(ssh -T "${GITPROVIDER}" 2>&1) #  Pipe both stderr and  stdout to variable
@@ -576,6 +676,9 @@ enforce_variable_with_value USERNAME "${USERNAME}"
           }
           else
           {
+            (( DEBUG )) && echo -e "${LIGHTGREEN} ✔ ${LIGHTYELLOW} GITPROVIDER is missing asigning github "
+            echo -e "${LIGHTGREEN} ✔ ${LIGHTYELLOW} ${GITPROVIDER} Outbound call to port 22. "
+            GITPROVIDER="git@github.com"
             TEST_GIT=""
             (( FLAGGITPROVIDER )) && (( DEBUG )) && echo "ssh -T ${GITPROVIDER}"
             (( FLAGGITPROVIDER )) &&  TEST_GIT=$(ssh -T git@github.com 2>&1) #  Pipe both stderr and  stdout to variable
