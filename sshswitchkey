@@ -3,6 +3,19 @@
 # @author Zeus Intuivo <zeus@intuivo.com>
 #
 #
+# set -u
+[[ -z "${CYAN:-}" ]] && CYAN="\\033[38;5;123m"
+[[ -z "${PURPLE_BLUE:-}" ]] && PURPLE_BLUE="\\033[38;5;93m"
+[[ -z "${GRAY241:-}" ]] && GRAY241="\\033[38;5;241m"
+[[ -z "${YELLOW226:-}" ]] && YELLOW226="\\033[38;5;226m"
+[[ -z "${YELLOW214:-}" ]] && YELLOW214="\\033[38;5;214m"
+[[ -z "${RESET:-}" ]] && RESET="\\033[0m"
+[[ -z "${RED:-}" ]] && RED="\\033[38;5;1m"
+[[ -z "${BRIGHT_BLUE87:-}" ]] && BRIGHT_BLUE87="\\033[38;5;87m"
+
+[[ -z "${GIT_USER_NAME:-}" ]] && GIT_USER_NAME=$(command git config --get user.name 2> /dev/null)
+
+
 install_lsof() {
   GIT_SSL_NO_VERIFY=true git clone https://github.com/lsof-org/lsof.git "$HOME/.lsof"
   cd "$HOME/.lsof"
@@ -336,21 +349,22 @@ fi
 
   load_struct_testing_wget() {
       local provider="$HOME/_/clis/execute_command_intuivo_cli/struct_testing"
-      [[   -e "${provider}"  ]] && source "${provider}" && (( DEBUG )) && echo  "struct_testing Loaded locally"
+      local _DEBUG=${DEBUG:-0}
+      [[   -e "${provider}"  ]] && source "${provider}" && (( _DEBUG )) && echo  "struct_testing Loaded locally"
       [[ ! -e "${provider}"  ]] && eval """$(wget --quiet --no-check-certificate  https://raw.githubusercontent.com/zeusintuivo/execute_command_intuivo_cli/master/struct_testing -O -  2>/dev/null )"""   # suppress only wget download messages, but keep wget output for variable
       ( ( ! command -v passed >/dev/null 2>&1; ) && echo -e "\n \n  ERROR! Loading struct_testing \n \n " && exit 69; )
       return 0
   } # end load_struct_testing_wget
 
-if [ -z "$PIPED" ] ; then
+if [ -z "${PIPED:-}" ] ; then
 {
-  echo -en "${RESET}\033[38;5;246m" 2>&1
+  echo -en "${RESET:-}\033[38;5;246m" 2>&1
 
 
   # -- SUDO START
-  if [[ "${USER}" == 'root' || "${LOGNAME}" == 'root' ]] ; then
+  if [[ "${USER:-}" == 'root' || "${LOGNAME:-}" == 'root' ]] ; then
   {
-    if [[ -n "${SUDO_USER}" && "${SUDO_USER}" != 'root' ]] ; then
+    if [[ -n "${SUDO_USER:-}" && "${SUDO_USER:-}" != 'root' ]] ; then
     {
       echo -e "\033[38;5;20m Suddoed-in from ${SUDO_USER} ! "
     }
@@ -366,7 +380,7 @@ if [ -z "$PIPED" ] ; then
     fi
   }
   fi
-  if  ( env | grep "SUDO_USER"  &>/dev/null  ) || [[ -z "${SUDO_USER}" ]] ; then
+  if  ( env | grep "SUDO_USER"  &>/dev/null  ) || [[ -z "${SUDO_USER:-}" ]] ; then
   {
     echo "Give password for ${USER} to get sudo access."
     sudo echo -n "Hey! sudo "
@@ -427,14 +441,16 @@ enforce_variable_with_value SUDO_UID "${SUDO_UID}"
 # echo -e "\033[38;5;45m FOREGROUND   "; echo -e "\033[48;5;45m BACKGROUND   "
 # cd ${USER_HOME}/
 EXECUTEOWD=$(pwd)
-(( DEBUG )) && echo "${EXECUTEOWD}"
-[[ -f "${EXECUTEOWD}/.temp_keys" ]] && (( DEBUG )) &&  echo "I found it "
+ _DEBUG=${DEBUG:-0}
+(( _DEBUG )) && echo "${EXECUTEOWD}"
+[[ -f "${EXECUTEOWD}/.temp_keys" ]] && (( _DEBUG )) &&  echo "I found it "
 [[ -f "${EXECUTEOWD}/.temp_keys" ]] &&  . "${EXECUTEOWD}/.temp_keys"
 
 
-if [[ -n "${VPNREQUIRED}" ]] ;  then
+# VPNREQUIRED from external env file like .temp_keys
+if [[ -n "${VPNREQUIRED:-}" ]] ;  then
 {
-  if (enforce_vpn_is_on "${VPNREQUIRED}") ; then  {
+  if (enforce_vpn_is_on "${VPNREQUIRED:-}") ; then  {
     echo Connected to VPN
   }
   else
@@ -447,12 +463,13 @@ if [[ -n "${VPNREQUIRED}" ]] ;  then
 fi
 
 FLAGGITPROVIDER=1
-if [[ -n "${GITPROVIDER}" ]] ;  then
+# VPNREQUIRED from external env file like .temp_keys
+if [[ -n "${GITPROVIDER:-}" ]] ;  then
 {
-  if (enforce_web_is_reachable  "${GITPROVIDER}") ; then {
+  if (enforce_web_is_reachable  "${GITPROVIDER:-}") ; then {
     # set -x
     # set +x
-    echo Reached "${GITPROVIDER}"
+    echo Reached "${GITPROVIDER:-}"
   }
   else
   {
@@ -465,7 +482,7 @@ if [[ -n "${GITPROVIDER}" ]] ;  then
 fi
 
 
-(( DEBUG )) && echo -e "\033[38;5;20m"  2>&1
+(( _DEBUG )) && echo -e "\033[38;5;20m"  2>&1
 cd "${USER_HOME}/.ssh/"
 #mkdir -p ${USER_HOME}/.ssh/
 sudo chmod 700 "${USER_HOME}/.ssh/"
@@ -501,10 +518,10 @@ fi
 
 
 OUTPUT_FOLDER="$(pwd)"
-(( DEBUG )) && echo -e "\033[38;5;25m" 2>&1
+(( _DEBUG )) && echo -e "\033[38;5;25m" 2>&1
 [[ ! -f "${OUTPUT_FOLDER}/${PROVIDED_USER}_rsa" ]] && echo -e "\n  Error this key does not exist. Pick from key on the list: \n ${KEYLIST} \n" && exit 1
 
-# DEBUG=1
+# _DEBUG=1
 # _2048
 [[ -e "${OUTPUT_FOLDER}/id_rsa2048.pub" ]] && sudo chmod 700 "${OUTPUT_FOLDER}/id_rsa2048.pub"
 [[ -e "${OUTPUT_FOLDER}/id_rsa2048" ]] && sudo chmod 700 "${OUTPUT_FOLDER}/id_rsa2048"
@@ -599,17 +616,17 @@ OUTPUT_FOLDER="$(pwd)"
 [[ -e "${OUTPUT_FOLDER}/id_ed25519_fido2.pub" ]] && sudo chown -R "${SUDO_USER}" "${OUTPUT_FOLDER}/id_ed25519_fido2.pub"
 [[ -e "${OUTPUT_FOLDER}/id_ed25519_fido2" ]] && sudo chown -R "${SUDO_USER}" "${OUTPUT_FOLDER}/id_ed25519_fido2"
 
-(( DEBUG )) && echo chmod 1 get_file_chmod "${OUTPUT_FOLDER}"
+(( _DEBUG )) && echo chmod 1 get_file_chmod "${OUTPUT_FOLDER}"
 get_file_chmod "${OUTPUT_FOLDER}"  &>/dev/null
-(( DEBUG )) && get_file_chmod "${OUTPUT_FOLDER}"
-(( DEBUG )) && echo chmod 2 get_file_chmod "${OUTPUT_FOLDER}/id_rsa.pub"
+(( _DEBUG )) && get_file_chmod "${OUTPUT_FOLDER}"
+(( _DEBUG )) && echo chmod 2 get_file_chmod "${OUTPUT_FOLDER}/id_rsa.pub"
 get_file_chmod "${OUTPUT_FOLDER}/id_rsa.pub"  &>/dev/null
-(( DEBUG )) && get_file_chmod "${OUTPUT_FOLDER}/id_rsa.pub"
-(( DEBUG )) && echo chmod 3  get_file_chmod "${OUTPUT_FOLDER}/id_rsa.pub"
+(( _DEBUG )) && get_file_chmod "${OUTPUT_FOLDER}/id_rsa.pub"
+(( _DEBUG )) && echo chmod 3  get_file_chmod "${OUTPUT_FOLDER}/id_rsa.pub"
 get_file_chmod "${OUTPUT_FOLDER}/id_rsa.pub"  &>/dev/null
-(( DEBUG )) && get_file_chmod "${OUTPUT_FOLDER}/id_rsa.pub"
-(( DEBUG )) && echo sudo cat "${OUTPUT_FOLDER}/id_rsa.pub"
-(( DEBUG )) && sudo cat "${OUTPUT_FOLDER}/id_rsa.pub"
+(( _DEBUG )) && get_file_chmod "${OUTPUT_FOLDER}/id_rsa.pub"
+(( _DEBUG )) && echo sudo cat "${OUTPUT_FOLDER}/id_rsa.pub"
+(( _DEBUG )) && sudo cat "${OUTPUT_FOLDER}/id_rsa.pub"
 # REF: https://www.shellhacks.com/regex-find-email-addresses-file-grep/
 GET_EMAIL_FROM_PUB_KEY=$(sudo cat "${OUTPUT_FOLDER}/id_rsa.pub" | grep -E -o "\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,6}\b")
 if [[ -z "${GET_EMAIL_FROM_PUB_KEY}"  ]] ; then
@@ -624,8 +641,8 @@ enforce_variable_with_value GET_USERNAME_FROM_EMAIL "${GET_USERNAME_FROM_EMAIL}"
 
 USERNAME="${GET_USERNAME_FROM_EMAIL}"
 enforce_variable_with_value USERNAME "${USERNAME}"
-(( DEBUG )) && echo -e "\033[38;5;26m" 2>&1
-(( DEBUG )) && echo "${USERNAME}";
+(( _DEBUG )) && echo -e "\033[38;5;26m" 2>&1
+(( _DEBUG )) && echo "${USERNAME}";
 #ssh -vT git@github.com
 [[ -e "${OUTPUT_FOLDER}/id_rsa2048.pub" ]] && sudo chmod 644 "${OUTPUT_FOLDER}/id_rsa2048.pub"
 [[ -e "${OUTPUT_FOLDER}/id_rsa2048" ]] && sudo chmod 600 "${OUTPUT_FOLDER}/id_rsa2048"
@@ -655,45 +672,45 @@ enforce_variable_with_value USERNAME "${USERNAME}"
 
 
 check_port 22 ssh
-# (( DEBUG )) && enforce_variable_with_value GITPROVIDER "${GITPROVIDER}"
+# (( _DEBUG )) && enforce_variable_with_value GITPROVIDER "${GITPROVIDER}"
           if ( typeset -p "GITPROVIDER"  &>/dev/null ) &&  [ -n "${GITPROVIDER+x}" ] ; then
           {
-            (( DEBUG )) && echo -e "${LIGHTGREEN} ✔ ${LIGHTYELLOW} ${GITPROVIDER} is given "
+            (( _DEBUG )) && echo -e "${LIGHTGREEN} ✔ ${LIGHTYELLOW} ${GITPROVIDER} is given "
             echo -e "${LIGHTGREEN} ✔ ${LIGHTYELLOW} ${GITPROVIDER} Outbound call to port 22. "
             TEST_GIT=""
-            (( FLAGGITPROVIDER )) && (( DEBUG )) && echo "ssh -T ${GITPROVIDER}"
+            (( FLAGGITPROVIDER )) && (( _DEBUG )) && echo "ssh -T ${GITPROVIDER}"
             (( FLAGGITPROVIDER )) && TEST_GIT=$(ssh -T "${GITPROVIDER}" 2>&1) #  Pipe both stderr and  stdout to variable
-            (( DEBUG )) && echo "${TEST_GIT}"
-            (( DEBUG )) && echo chmod 1 get_file_chmod "${OUTPUT_FOLDER}"
+            (( _DEBUG )) && echo "${TEST_GIT}"
+            (( _DEBUG )) && echo chmod 1 get_file_chmod "${OUTPUT_FOLDER}"
             get_file_chmod "${OUTPUT_FOLDER}"  &>/dev/null
-            (( DEBUG )) && get_file_chmod "${OUTPUT_FOLDER}"
-            (( DEBUG )) && echo chmod 2 get_file_chmod "${OUTPUT_FOLDER}/id_rsa.pub"
+            (( _DEBUG )) && get_file_chmod "${OUTPUT_FOLDER}"
+            (( _DEBUG )) && echo chmod 2 get_file_chmod "${OUTPUT_FOLDER}/id_rsa.pub"
             get_file_chmod "${OUTPUT_FOLDER}/id_rsa.pub"  &>/dev/null
-            (( DEBUG )) && get_file_chmod "${OUTPUT_FOLDER}/id_rsa.pub"
-            (( DEBUG )) && echo chmod 3  get_file_chmod "${OUTPUT_FOLDER}/id_rsa.pub"
+            (( _DEBUG )) && get_file_chmod "${OUTPUT_FOLDER}/id_rsa.pub"
+            (( _DEBUG )) && echo chmod 3  get_file_chmod "${OUTPUT_FOLDER}/id_rsa.pub"
             get_file_chmod "${OUTPUT_FOLDER}/id_rsa.pub"  &>/dev/null
-            (( DEBUG )) && get_file_chmod "${OUTPUT_FOLDER}/id_rsa.pub"
+            (( _DEBUG )) && get_file_chmod "${OUTPUT_FOLDER}/id_rsa.pub"
           }
           else
           {
-            (( DEBUG )) && echo -e "${LIGHTGREEN} ✔ ${LIGHTYELLOW} GITPROVIDER is missing asigning github "
+            (( _DEBUG )) && echo -e "${LIGHTGREEN} ✔ ${LIGHTYELLOW} GITPROVIDER is missing asigning github "
             echo -e "${LIGHTGREEN} ✔ ${LIGHTYELLOW} ${GITPROVIDER} Outbound call to port 22. "
             GITPROVIDER="git@github.com"
             TEST_GIT=""
-            (( FLAGGITPROVIDER )) && (( DEBUG )) && echo "ssh -T ${GITPROVIDER}"
+            (( FLAGGITPROVIDER )) && (( _DEBUG )) && echo "ssh -T ${GITPROVIDER}"
             (( FLAGGITPROVIDER )) &&  TEST_GIT=$(ssh -T git@github.com 2>&1) #  Pipe both stderr and  stdout to variable
-            (( DEBUG )) && echo chmod 1 get_file_chmod "${OUTPUT_FOLDER}"
+            (( _DEBUG )) && echo chmod 1 get_file_chmod "${OUTPUT_FOLDER}"
             get_file_chmod "${OUTPUT_FOLDER}" &>/dev/null
-            (( DEBUG )) && get_file_chmod "${OUTPUT_FOLDER}"
-            (( DEBUG )) && echo chmod 2 get_file_chmod "${OUTPUT_FOLDER}/id_rsa.pub"
+            (( _DEBUG )) && get_file_chmod "${OUTPUT_FOLDER}"
+            (( _DEBUG )) && echo chmod 2 get_file_chmod "${OUTPUT_FOLDER}/id_rsa.pub"
             get_file_chmod "${OUTPUT_FOLDER}/id_rsa.pub" &>/dev/null
-            (( DEBUG )) && get_file_chmod "${OUTPUT_FOLDER}/id_rsa.pub"
-            (( DEBUG )) && echo chmod 3  get_file_chmod "${OUTPUT_FOLDER}/id_rsa.pub"
+            (( _DEBUG )) && get_file_chmod "${OUTPUT_FOLDER}/id_rsa.pub"
+            (( _DEBUG )) && echo chmod 3  get_file_chmod "${OUTPUT_FOLDER}/id_rsa.pub"
             get_file_chmod "${OUTPUT_FOLDER}/id_rsa.pub" &>/dev/null
-            (( DEBUG )) && get_file_chmod "${OUTPUT_FOLDER}/id_rsa.pub"
+            (( _DEBUG )) && get_file_chmod "${OUTPUT_FOLDER}/id_rsa.pub"
 
- (( DEBUG )) &&  echo -e "\033[38;5;38m" 2>&1
- (( FLAGGITPROVIDER )) &&  (( DEBUG )) && echo "${TEST_GIT}"
+ (( _DEBUG )) &&  echo -e "\033[38;5;38m" 2>&1
+ (( FLAGGITPROVIDER )) &&  (( _DEBUG )) && echo "${TEST_GIT}"
  (( FLAGGITPROVIDER )) &&   enforce_variable_with_value TEST_GIT $TEST_GIT
 
           }
@@ -721,31 +738,31 @@ check_port 22 ssh
 	if [[ "$(uname)" == "Darwin" ]] ; then
   {
 	  # Do something under Mac OS X platform
-	  (( DEBUG )) && echo -e "\033[38;5;26m Stopping All SSH. It is expected to restart."
-	  (( DEBUG )) && echo -e "\033[38;5;27m"
+	  (( _DEBUG )) && echo -e "\033[38;5;26m Stopping All SSH. It is expected to restart."
+	  (( _DEBUG )) && echo -e "\033[38;5;27m"
 	  sudo launchctl stop com.openssh.sshd
 	  wait
-	  (( DEBUG )) && echo -e "\033[38;5;32m"
+	  (( _DEBUG )) && echo -e "\033[38;5;32m"
 	  sudo killall sshd 2>/dev/null
 	  wait
-	  (( DEBUG )) && echo "Removing all Keys added to the agent."
+	  (( _DEBUG )) && echo "Removing all Keys added to the agent."
 	  sudo ssh-add -D
 	  wait
-	  (( DEBUG )) && echo -e "\033[38;5;33m"
-	  (( DEBUG )) && echo "Adding just the only key we want to use."
-	  (( DEBUG )) && echo "${OUTPUT_FOLDER}/id_rsa2048 needs pin"
+	  (( _DEBUG )) && echo -e "\033[38;5;33m"
+	  (( _DEBUG )) && echo "Adding just the only key we want to use."
+	  (( _DEBUG )) && echo "${OUTPUT_FOLDER}/id_rsa2048 needs pin"
 	  [[ -e "${OUTPUT_FOLDER}/id_rsa2048" ]] && sudo ssh-add "${OUTPUT_FOLDER}/id_rsa2048"
 	  #[[ -e "${OUTPUT_FOLDER}/id_rsa2048" ]] && sudo ssh-add -K "${OUTPUT_FOLDER}/id_rsa2048"
-	  (( DEBUG )) && echo "${OUTPUT_FOLDER}/id_rsa needs pin"
+	  (( _DEBUG )) && echo "${OUTPUT_FOLDER}/id_rsa needs pin"
     [[ -e "${OUTPUT_FOLDER}/id_rsa" ]] && sudo ssh-add "${OUTPUT_FOLDER}/id_rsa"
     #[[ -e "${OUTPUT_FOLDER}/id_rsa" ]] && sudo ssh-add -K "${OUTPUT_FOLDER}/id_rsa"
-	  (( DEBUG )) && echo "${OUTPUT_FOLDER}/_ed25519"
+	  (( _DEBUG )) && echo "${OUTPUT_FOLDER}/_ed25519"
     [[ -e "${OUTPUT_FOLDER}/_ed25519" ]] && sudo ssh-add -K "${OUTPUT_FOLDER}/_ed25519"
-	  (( DEBUG )) && echo "${OUTPUT_FOLDER}/_ed25519_sk"
+	  (( _DEBUG )) && echo "${OUTPUT_FOLDER}/_ed25519_sk"
     [[ -e "${OUTPUT_FOLDER}/_ed25519_sk" ]] && sudo ssh-add -K "${OUTPUT_FOLDER}/_ed25519_sk"
-	  (( DEBUG )) && echo "${OUTPUT_FOLDER}/_ed25519_fido2"
+	  (( _DEBUG )) && echo "${OUTPUT_FOLDER}/_ed25519_fido2"
     [[ -e "${OUTPUT_FOLDER}/_ed25519_fido2" ]] && sudo ssh-add -K "${OUTPUT_FOLDER}/_ed25519_fido2"
-	  (( DEBUG )) && echo "${OUTPUT_FOLDER}/_ecdsa_sk"
+	  (( _DEBUG )) && echo "${OUTPUT_FOLDER}/_ecdsa_sk"
     [[ -e "${OUTPUT_FOLDER}/_ecdsa_sk" ]] && sudo ssh-add -K "${OUTPUT_FOLDER}/_ecdsa_sk"
 
      (( FLAGGITPROVIDER )) &&  [[ "${TEST_GIT}" ==  *"Permission denied"* ]] && $(pbcopy < ${OUTPUT_FOLDER}/${PROVIDED_USER}_rsa.pub)  && echo "------ Key Needs to be added in WebPAGE. Copied to CLipboard"
@@ -811,7 +828,7 @@ git config --global user.name "${USERNAME}"
 echo -en "\033[38;5;51m" 2>&1
 OUTPUT_GITCONFIG="$(git config --global -l )"
 echo -n "$OUTPUT_GITCONFIG" | grep "user."
-(( DEBUG )) && sudo ssh-add -l
+(( _DEBUG )) && sudo ssh-add -l
 echo -en "\033[0m" 2>&1
 # git config -l
 #
