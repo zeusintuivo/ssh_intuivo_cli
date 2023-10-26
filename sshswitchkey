@@ -3,7 +3,7 @@
 # @author Zeus Intuivo <zeus@intuivo.com>
 #
 #
-# set -u
+# #set -u
 [[ -z "${CYAN:-}" ]] && CYAN="\\033[38;5;123m"
 [[ -z "${PURPLE_BLUE:-}" ]] && PURPLE_BLUE="\\033[38;5;93m"
 [[ -z "${GRAY241:-}" ]] && GRAY241="\\033[38;5;241m"
