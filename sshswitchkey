@@ -41,6 +41,7 @@ install_lsof() {
   ln -sf "$HOME/.lsof/lsof" /usr/local/bin/lsof
   chmod a+x "$HOME/.lsof/lsof"
 } # end install_lsof
+
 check_port_sudo(){
     local port="${1}"
     local service="${2}"
@@ -79,6 +80,7 @@ check_port_sudo(){
     fi
 
 } # end check_port_sudo
+
 check_port(){
   local port="${1}"
   local service="${2}"
@@ -443,6 +445,7 @@ enforce_variable_with_value SUDO_UID "${SUDO_UID}"
 EXECUTEOWD=$(pwd)
  _DEBUG=${DEBUG:-0}
 (( _DEBUG )) && echo "${EXECUTEOWD}"
+Checking "${EXECUTEOWD}/.temp_keys"
 [[ -f "${EXECUTEOWD}/.temp_keys" ]] && (( _DEBUG )) &&  echo "I found it "
 [[ -f "${EXECUTEOWD}/.temp_keys" ]] &&  . "${EXECUTEOWD}/.temp_keys"
 
