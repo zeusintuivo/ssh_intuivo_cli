@@ -774,12 +774,21 @@ check_port 22 ssh
   {
 	  # Do something under GNU/Linux platform
 	  # ubuntu lsb_release -i | sed 's/Distributor\ ID://g' = \tUbuntu\n
+		set -x
     echo "xclip -sel clip < ${OUTPUT_FOLDER}/${PROVIDED_USER}_rsa.pub"
-    xclip -sel clip < "${OUTPUT_FOLDER}/${PROVIDED_USER}_rsa.pub"
-     (( FLAGGITPROVIDER )) &&  [[ "${TEST_GIT}" ==  *"Permission denied"* ]] && $(xclip -sel clip < ${OUTPUT_FOLDER}/${PROVIDED_USER}_rsa.pub)  && echo "------ Key Needs to be added in WebPAGE. Copied to CLipboard"
+    #xclip -sel clip < "${OUTPUT_FOLDER}/${PROVIDED_USER}_rsa.pub"
+    #(( FLAGGITPROVIDER )) &&  [[ "${TEST_GIT}" ==  *"Permission denied"* ]] && $(xclip -sel clip < ${OUTPUT_FOLDER}/${PROVIDED_USER}_rsa.pub)  && echo "------ Key Needs to be added in WebPAGE. Copied to CLipboard"
     # (( FLAGGITPROVIDER )) &&  echo "no xclip"
   }
-	elif [[ "$(expr substr $(uname -s) 1 10)" == "MINGW32_NT" ]] ; then
+	elif [[ "$(expr substr $(uname -s) 1 10)" == "MINGW64_NT" ]] ; then
+  {
+	  # Do something under Windows NT platform
+     (( FLAGGITPROVIDER )) &&  [[ "${TEST_GIT}" ==  *"Permission denied"* ]] && $(cat ${OUTPUT_FOLDER}/${PROVIDED_USER}_rsa.pub | cpy)  && echo "------ Key Needs to be added in WebPAGE. Copied to CLipboard"
+	  # cat ${OUTPUT_FOLDER}/${PROVIDED_USER}_rsa.pub | cpy
+	  # cat ${USER_HOME}/.ssh/id_rsa.pub | clip
+	  # nothing here
+  }
+  elif [[ "$(expr substr $(uname -s) 1 10)" == "MINGW32_NT" ]] ; then
   {
 	  # Do something under Windows NT platform
      (( FLAGGITPROVIDER )) &&  [[ "${TEST_GIT}" ==  *"Permission denied"* ]] && $(cat ${OUTPUT_FOLDER}/${PROVIDED_USER}_rsa.pub | cpy)  && echo "------ Key Needs to be added in WebPAGE. Copied to CLipboard"
