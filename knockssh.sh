@@ -10,5 +10,5 @@ REF https://help.ubuntu.com/community/PortKnocking#Client_Side
 
 "
 knock -v $1 7000 8000 9000
-ssh $2
+ssh -vvv $2
 
